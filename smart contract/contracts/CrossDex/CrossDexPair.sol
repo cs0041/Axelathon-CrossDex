@@ -78,8 +78,13 @@ contract CrossDexPair is CrossDexERC20 {
         _update(token0.balanceOf(address(this)), token1.balanceOf(address(this)));
     }
 
-    function addLiquidity(uint256 _amount0, uint256 _amount1,address to) external returns (uint256 liquidity) {
+    function addLiquidity(uint256 _amount0, uint256 _amount1,address to,bool isAmount0Main) external returns (uint256 liquidity) {
         if (reserve0 > 0 || reserve1 > 0) {
+            if(reserve0 * _amount1 != reserve1 * _amount0){
+                (_amount0, _amount1) = isAmount0Main
+                ? (_amount0,(reserve1 * _amount0) / reserve0)
+                : ((reserve0 * _amount1) / reserve1, _amount1 );
+            }
             require(reserve0 * _amount1 == reserve1 * _amount0, "CrossDex: INSUFFICIENT_AMOUNT x / y != dx / dy");
         }
         
