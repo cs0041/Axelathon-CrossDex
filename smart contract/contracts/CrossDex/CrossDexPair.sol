@@ -17,6 +17,37 @@ contract CrossDexPair is CrossDexERC20 {
         token1 = IERC20(_token1);
     }
 
+    
+    function getReserves() public view returns (uint256 _reserve0, uint256 _reserve1) {
+        _reserve0 = reserve0;
+        _reserve1 = reserve1;
+
+    }
+
+    function getAmountsIn(uint256 _amountOut,address _tokenIn) external  view returns(uint256 amountIn) {
+         bool isToken0 = _tokenIn == address(token0);
+        (uint256 reserveIn, uint256 reserveOut) = isToken0
+            ? (reserve0, reserve1)
+            : (reserve1, reserve0);
+        
+        amountIn =  ((reserveOut*reserveIn)/(reserveOut-_amountOut)) - reserveIn;
+        return amountIn;
+        
+      
+    }
+    function getAmountsOut(uint256 _amountIn,address _tokenIn) external  view returns(uint256 amountOut) {
+        bool isToken0 = _tokenIn == address(token0);
+        (uint256 reserveIn, uint256 reserveOut) = isToken0
+            ? (reserve0, reserve1)
+            : (reserve1, reserve0);
+    
+
+        uint256 amountInWithFee = (_amountIn * 1000) / 1000;
+        amountOut = (reserveOut * amountInWithFee) / (reserveIn + amountInWithFee);
+        return amountOut;
+    }
+
+
     function _update(uint256 _reserve0, uint256 _reserve1) private {
         reserve0 = _reserve0;
         reserve1 = _reserve1;
