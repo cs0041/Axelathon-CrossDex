@@ -78,30 +78,68 @@ contract CrossDexPair is CrossDexERC20 {
         _update(token0.balanceOf(address(this)), token1.balanceOf(address(this)));
     }
 
-    function addLiquidity(uint256 _amount0, uint256 _amount1,address to,bool isAmount0Main) external returns (uint256 liquidity) {
-        if (reserve0 > 0 || reserve1 > 0) {
-            if(reserve0 * _amount1 != reserve1 * _amount0){
-                (_amount0, _amount1) = isAmount0Main
-                ? (_amount0,(reserve1 * _amount0) / reserve0)
-                : ((reserve0 * _amount1) / reserve1, _amount1 );
-            }
-            require(reserve0 * _amount1 == reserve1 * _amount0, "CrossDex: INSUFFICIENT_AMOUNT x / y != dx / dy");
-        }
+
+    function addLiquidity(uint256 _amount0, uint256 _amount1,address to,bool isForceAdd) external returns (uint256 liquidity) {
         
         token0.transferFrom(msg.sender, address(this), _amount0);
         token1.transferFrom(msg.sender, address(this), _amount1);
- 
+
+        uint256 famount0;
+        uint256 famount1;
+
+        if (reserve0 > 0 || reserve1 > 0) {
+            if(isForceAdd && reserve0 * _amount1 != reserve1 * _amount0){
+                // try force amount0 frist 
+                famount0 = _amount0;
+                famount1 = (reserve1 * _amount0) / reserve0;
+                if(famount1>_amount1){
+                    // try  force amount1
+                    famount0 = (reserve0 * _amount1) / reserve1;
+                    famount1 = _amount1;
+                    require(famount0 <= _amount0,"CrossDex: Fail ForceAdd");
+                }
+            }else{
+                famount0 = _amount0;
+                famount1 = _amount1;
+            }
+
+
+            // check equation
+            {
+                uint256 tempMul0 = (reserve0 * famount1);
+                uint256 tempMul1 = (reserve1 * famount0);
+                if( tempMul0 > tempMul1){
+                    require( (tempMul0 - tempMul1)/ 10 ** 18 <= 1000, "CrossDex: INSUFFICIENT_AMOUNT x / y != dx / dy");
+                }else{
+                    require( (tempMul1 - tempMul0)/ 10 ** 18 <= 1000, "CrossDex: INSUFFICIENT_AMOUNT x / y != dx / dy");
+                }
+
+            }
+        }else{
+            famount0 = _amount0;
+            famount1 = _amount1;
+        }
+
         if (totalSupply == 0) {
-            liquidity = _sqrt(_amount0 * _amount1);
+            liquidity = _sqrt(famount0 * famount1);
         } else {
             liquidity = _min(
-                (_amount0 * totalSupply) / reserve0,
-                (_amount1 * totalSupply) / reserve1
+                (famount0 * totalSupply) / reserve0,
+                (famount1 * totalSupply) / reserve1
             );
         }
         require(liquidity > 0, "CrossDex: Liquidity Zero");
         _mint(to, liquidity);
 
+        // refund if not using all token add lp
+        if(_amount0>famount0){
+            token0.transfer(msg.sender,_amount0 - famount0);
+        }
+ 
+        if(_amount1>famount1){
+            token1.transfer(msg.sender, _amount1 - famount1);
+        }
+ 
         _update(token0.balanceOf(address(this)), token1.balanceOf(address(this)));
     }
 
