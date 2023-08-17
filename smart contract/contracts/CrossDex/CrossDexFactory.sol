@@ -12,7 +12,7 @@ contract CrossDexFactory is ICrossDexFactory , Ownable {
     address[] public allPairs;
     address public router;
 
-    function setROuter(address _router) public onlyOwner {
+    function setRouter(address _router) public onlyOwner {
         router = _router;
     }
 
@@ -21,7 +21,7 @@ contract CrossDexFactory is ICrossDexFactory , Ownable {
         return allPairs.length;
     }
 
-    function createPair(address token0, address token1) external returns (address) {
+    function createPair(address token0, address token1,address to) external onlyOwner returns (address) {
         require(token0 != token1, "CrossDex: IDENTICAL_ADDRESSES");
         require(token0 != address(0), "CrossDex: ZERO_ADDRESS");
         require(getPair[token0][token1] == address(0), "CrossDex: PAIR_EXISTS"); // single check is sufficient
@@ -31,6 +31,7 @@ contract CrossDexFactory is ICrossDexFactory , Ownable {
         CrossDexPair newPair = new CrossDexPair{salt: _salt}(token0,token1,router);
         address pair = address(newPair);
         require(pair != address(0),"CrossDex: Fail_CreatePair");
+        newPair.transferOwnership(to);
 
         getPair[token0][token1] = pair;
         getPair[token1][token0] = pair; // populate mapping in the reverse direction
@@ -41,7 +42,7 @@ contract CrossDexFactory is ICrossDexFactory , Ownable {
     }
 
     // onnly use for secondary Chain
-    function forceAddPair(address token0, address token1, address pairLP) external onlyOwner {
+    function forceAddExistsPair(address token0, address token1, address pairLP) external onlyOwner {
         require(getPair[token0][token1] == address(0), "CrossDex: PAIR_EXISTS"); // single check is sufficient
         getPair[token0][token1] = pairLP;
         getPair[token1][token0] = pairLP; // populate mapping in the reverse direction
