@@ -3,17 +3,32 @@ pragma solidity ^0.8.9;
 
  
 import "./interface/interfaceCrossDexERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract CrossDexERC20 is ICrossDexERC20 {
+contract CrossDexERC20 is ICrossDexERC20,Ownable {
     uint256  public constant MAX_INT = 2**256 - 1 ;
     string public constant name = 'CrossDex LPs';
     string public constant symbol = 'CRD-LP';
     uint8 public constant decimals = 18;
     uint  public totalSupply;
+    address public axelraBridgeAddress;
     mapping(address => uint) public balanceOf;
     mapping(address => mapping(address => uint)) public allowance;
+    mapping(bytes32 => address) public tokenAddressMappingByChain;
 
-    //  constructor() public {}
+
+    // Link address contract Token in the destination chain
+    function setDestinationAddressToekenMapping(string calldata chainName,address addressToken) public onlyOwner {
+        tokenAddressMappingByChain[keccak256(abi.encode(chainName))] = addressToken;
+    }
+
+    function getDestinationAddressToken (string calldata chainName) public view  returns(address){
+        return  tokenAddressMappingByChain[keccak256(abi.encode(chainName))];
+    }
+
+    function setAxelraBridgeAddress(address _axelraBridgeAddress)  public onlyOwner {
+        axelraBridgeAddress = _axelraBridgeAddress;
+    }
 
     function _mint(address to, uint value) internal {
         totalSupply = totalSupply + value;
