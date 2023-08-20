@@ -14,9 +14,6 @@ interface ICrossDexPair {
 
 
     // for token
-    function mint(address to, uint256 amount) external;
-    function burn(address to, uint256 amount) external;
-    function getTokenAddressMappingByChain (string calldata chainName) external view  returns(address);
     function name() external pure returns (string memory);
     function symbol() external pure returns (string memory);
     function decimals() external pure returns (uint8);
