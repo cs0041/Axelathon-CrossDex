@@ -130,18 +130,18 @@ contract CrossDexPair is CrossDexERC20 {
 
         // refund if not using all token add lp
         if(_amount0>famount0){
-            token0.transfer(msg.sender,_amount0 - famount0);
+            token0.transfer(to,_amount0 - famount0);
         }
  
         if(_amount1>famount1){
-            token1.transfer(msg.sender, _amount1 - famount1);
+            token1.transfer(to, _amount1 - famount1);
         }
  
         _update(token0.balanceOf(address(this)), token1.balanceOf(address(this)));
     }
 
     function removeLiquidity(uint256 liquidity, address to) external returns (uint256 amount0, uint256 amount1) {
-        transferFrom(msg.sender, address(this), liquidity);
+        IERC20(address(this)).transferFrom(msg.sender, address(this), liquidity);
 
         uint256 bal0 = token0.balanceOf(address(this));
         uint256 bal1 = token1.balanceOf(address(this));
