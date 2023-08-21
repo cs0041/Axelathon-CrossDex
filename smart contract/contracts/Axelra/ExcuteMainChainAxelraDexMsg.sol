@@ -133,7 +133,37 @@ contract ExcuteMainChainAxelraDexMsg  {
         for (uint256 i = 0; i<addressTokens.length; i++) {
             IAToken(addressTokens[i]).mint(to, amounts[i]);     
         }
-    }   
+    }
+
+   function handleFailedBridgeSwap(address _sender,string calldata sourceChain,bytes memory payload) external onlyAxelraDexMsg {
+        ( uint256 amountIn, , address addressTokenIN, ,  , ) =  abi.decode(payload, (uint256,uint256,address,address,address,string));
+
+            IAToken(addressTokenIN).mint(address(this), amountIn);        
+       
+            address[] memory addressTokens = new address[](1);
+            uint256[] memory amount = new uint256[](1);
+            addressTokens[0] = addressTokenIN;
+            amount[0] = amountIn;
+
+            axelraDexMsg.bridgeToken(sourceChain,  addressTokens, amount, _sender);
+    }
+
+    function handleFailedBridgeAddLiquidity(address _sender,string calldata sourceChain,bytes memory payload) external onlyAxelraDexMsg {
+         ( uint256 amount0, uint256 amount1, address addressToken0,  address addressToken1, , , ) =  abi.decode(payload, (uint256,uint256,address,address,bool,address,string));
+            
+            IAToken(addressToken0).mint(address(this), amount0);      
+            IAToken(addressToken1).mint(address(this), amount1);      
+ 
+            address[] memory addressTokens = new address[](2);
+            uint256[] memory amount = new uint256[](2);
+            addressTokens[0] = addressToken0;
+            amount[0] = amount0;
+            addressTokens[1] = addressToken1;
+            amount[1] = amount1;
+
+            axelraDexMsg.bridgeToken(sourceChain,  addressTokens, amount, _sender);
+    }
+    
 
     function mintToken(address token,address to, uint256 amount) external onlyAxelraDexMsg{
         IAToken(token).mint(to, amount);

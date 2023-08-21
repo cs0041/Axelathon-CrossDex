@@ -110,15 +110,24 @@ contract MainChainAxelraDexMsg is  Ownable, AxelarExecutable {
         (address _sender, uint8 _action, bytes memory _payload) = abi.decode(payload, (address,uint8,bytes));
 
         if(_action == 0){
-            excuteAxelraDexMsg.excuteBridgeSwap(_payload);
+            try excuteAxelraDexMsg.excuteBridgeSwap(_payload) {
+            } catch {
+                excuteAxelraDexMsg.handleFailedBridgeSwap(_sender,sourceChain,_payload);
+            }
         }
         if(_action == 1){
+            // no need to handle error
             excuteAxelraDexMsg.excuteBridgeToken(_payload);
         }
         if(_action == 2){
-           excuteAxelraDexMsg.excuteBridgeAddLiquidity(_payload);
+            try excuteAxelraDexMsg.excuteBridgeAddLiquidity(_payload) {
+            } catch {
+                excuteAxelraDexMsg.handleFailedBridgeAddLiquidity(_sender,sourceChain,_payload);
+            }
+
         }
         if(_action == 3){
+           // no need to handle error
            excuteAxelraDexMsg.excuteBridgeRemoveLiquidity(_sender,_payload);
         }
     }
