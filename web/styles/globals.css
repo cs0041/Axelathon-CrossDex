@@ -15,11 +15,17 @@
 
 
   body {
-        @apply bg-[#0B0B0B] text-white  
+        @apply bg-[#0D111C] text-white  
         font-Inter
     }
   
-    
+}
 
-   
+@layer components {
+     .InputOrder {
+        @apply bg-[#121A2A] rounded-lg flex flex-col  border-[1px] border-[#121A2A] hover:border-gray-700
+         cursor-text transition-all
+    }
+
+ 
 }
