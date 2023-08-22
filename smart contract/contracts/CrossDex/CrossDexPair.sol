@@ -4,17 +4,22 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./CrossDexERC20.sol";
 
-contract CrossDexPair is CrossDexERC20 {
+contract CrossDexPair is CrossDexERC20{
     IERC20 public immutable token0;
     IERC20 public immutable token1;
 
     uint256 public reserve0;
     uint256 public reserve1;
 
-    constructor(address _token0, address _token1)  {
+    address public axelraAddress;
+
+    constructor(address _token0, address _token1, address _axelraAddress)  {
         token0 = IERC20(_token0);
         token1 = IERC20(_token1);
+        axelraAddress = _axelraAddress;
     }
+
+
     
     function getReserves() public view returns (uint256 _reserve0, uint256 _reserve1) {
         _reserve0 = reserve0;
@@ -142,6 +147,24 @@ contract CrossDexPair is CrossDexERC20 {
 
     function removeLiquidity(uint256 liquidity, address to) external returns (uint256 amount0, uint256 amount1) {
         IERC20(address(this)).transferFrom(msg.sender, address(this), liquidity);
+
+        uint256 bal0 = token0.balanceOf(address(this));
+        uint256 bal1 = token1.balanceOf(address(this));
+
+        amount0 = (liquidity * bal0) / totalSupply;
+        amount1 = (liquidity * bal1) / totalSupply;
+        require(amount0 > 0 && amount1 > 0, "CrossDex: amount0 or amount1 = 0");
+
+        _burn(address(this), liquidity);
+        _update(bal0 - amount0, bal1 - amount1);
+
+        token0.transfer(to, amount0);
+        token1.transfer(to, amount1);
+    }
+
+    function removeLiquidityByAxelra(uint256 liquidity,address from, address to) external returns (uint256 amount0, uint256 amount1) {
+        require(msg.sender == axelraAddress,"CrossDex: invalid caller");
+        _transfer(from, address(this), liquidity);
 
         uint256 bal0 = token0.balanceOf(address(this));
         uint256 bal1 = token1.balanceOf(address(this));

@@ -8,6 +8,11 @@ import "./interface/interfaceCrossDexFactory.sol";
 contract CrossDexFactory is ICrossDexFactory  {
     mapping(address => mapping(address => address)) public getPair;
     address[] public allPairs;
+    address public axelraAddress;
+
+    constructor(address _axelraAddress) {
+        axelraAddress = _axelraAddress;
+    }
 
     function allPairsLength() external view returns (uint) {
         return allPairs.length;
@@ -20,7 +25,7 @@ contract CrossDexFactory is ICrossDexFactory  {
         
 
         bytes32 _salt = keccak256(abi.encodePacked(token0, token1));
-        CrossDexPair newPair = new CrossDexPair{salt: _salt}(token0,token1);
+        CrossDexPair newPair = new CrossDexPair{salt: _salt}(token0,token1,axelraAddress);
         address pair = address(newPair);
         require(pair != address(0),"CrossDex: Fail_CreatePair");
         getPair[token0][token1] = pair;

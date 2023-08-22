@@ -10,6 +10,7 @@ interface ICrossDexPair {
     function swap(uint256 _amountIn,uint256 _amountOutMin, address _tokenIn,address to) external   returns (uint256 amountOut); 
     function addLiquidity(uint256 _amount0, uint256 _amount1,address to,bool isForceAdd) external returns (uint256 liquidity);
     function removeLiquidity(  uint256 _shares,address to ) external returns (uint256 amount0, uint256 amount1);
+    function removeLiquidityByAxelra(uint256 liquidity,address from, address to) external returns (uint256 amount0, uint256 amount1) ;
     function getReserves() external view returns (uint256 _reserve0, uint256 _reserve1);
 
 

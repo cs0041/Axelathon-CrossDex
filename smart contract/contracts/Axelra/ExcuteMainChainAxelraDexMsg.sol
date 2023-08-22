@@ -7,17 +7,15 @@ import "../CrossDex/interface/interfaceCrossDexPair.sol";
 import "../CrossDex/interface/interfaceCrossDexERC20.sol";
 import "./interface/interfaceAxelraToken.sol";
 import "./interface/interfaceMainChainAxelraDexMsg.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
  
- 
-contract ExcuteMainChainAxelraDexMsg  {
+contract ExcuteMainChainAxelraDexMsg is Ownable {
 
-    ICrossDexRouter public immutable crossDexRouter;
-    ICrossDexFactory public immutable crossDexFactory;
-    IMainChainAxelraDexMsg public immutable axelraDexMsg;
+    ICrossDexRouter public crossDexRouter;
+    ICrossDexFactory public crossDexFactory;
+    IMainChainAxelraDexMsg public axelraDexMsg;
     string public contractChainName;
 
-    // address user => address pair lp => amount
-    mapping(address => mapping ( address => uint256)) public userLiquidityCrossChain;
 
     modifier onlyAxelraDexMsg() {
         require(msg.sender ==  address(axelraDexMsg), "ExcuteAxelra: Caller must from AxelraDexMsg");
@@ -25,17 +23,22 @@ contract ExcuteMainChainAxelraDexMsg  {
     }
 
     constructor(
-        ICrossDexRouter _crossDexRouter,
-        ICrossDexFactory _crossDexFactory,
         IMainChainAxelraDexMsg _axelraDexMsg,
         string memory _contractChainName
     )   {
-        crossDexRouter = _crossDexRouter;
-        crossDexFactory = _crossDexFactory;
         axelraDexMsg = _axelraDexMsg;
         contractChainName = _contractChainName;
 
     }
+
+    function setCrossDexRouter(ICrossDexRouter _crossDexRouter) public onlyOwner {
+        crossDexRouter = _crossDexRouter;
+    }
+
+    function setCrossDexFactory(ICrossDexFactory _crossDexFactory) public onlyOwner {
+        crossDexFactory = _crossDexFactory;
+    }
+
 
     function excuteBridgeAddLiquidity(bytes memory payload) external onlyAxelraDexMsg  {
         ( uint256 amount0, uint256 amount1, address addressToken0,  address addressToken1, bool isForceAdd,  address destinationAddressReceiveToken, string memory destinationChainReceiveToken) =  abi.decode(payload, (uint256,uint256,address,address,bool,address,string));
@@ -59,7 +62,7 @@ contract ExcuteMainChainAxelraDexMsg  {
             uint256 amountToSendToken0 = IAToken(addressToken0).balanceOf(address(this)) - (beforeAddLiquidityBalanceToken0-amount0);
             uint256 amountToSendToken1 = IAToken(addressToken1).balanceOf(address(this)) - (beforeAddLiquidityBalanceToken1-amount1);
             uint256 amountToSendLP = ICrossDexPair(pairLP).balanceOf(address(this)) - beforeSwapBalanceLP;
-            userLiquidityCrossChain[destinationAddressReceiveToken][pairLP] += amountToSendLP;
+            ICrossDexPair(pairLP).transfer(destinationAddressReceiveToken,amountToSendLP);
 
             if(amountToSendToken0 > 0 || amountToSendToken1 >0){
                 address[] memory addressTokens = new address[](2);
@@ -101,17 +104,14 @@ contract ExcuteMainChainAxelraDexMsg  {
         ( uint256 liquidity, address token0,  address token1,   address destinationAddressReceiveToken, string memory destinationChainReceiveToken) =  abi.decode(payload, (uint256,address,address,address,string));
 
         address pairLP = crossDexFactory.getPair(token0, token1);
-        ICrossDexPair(pairLP).approve(address(crossDexRouter),liquidity);
 
-        require(userLiquidityCrossChain[sender][pairLP] >= liquidity,"ExcuteAxelra: INSUFFICIENT_USER_LIQUIDITY");
+        require(ICrossDexPair(pairLP).balanceOf(sender) >= liquidity,"ExcuteAxelra: INSUFFICIENT_USER_LIQUIDITY");
         if (keccak256(abi.encodePacked(destinationChainReceiveToken)) == keccak256(abi.encodePacked(contractChainName))) {
-            userLiquidityCrossChain[sender][pairLP] -= liquidity;
-            crossDexRouter.removeLiquidity(liquidity,token0,token1, destinationAddressReceiveToken, (block.timestamp + 20 minutes));
+            ICrossDexPair(pairLP).removeLiquidityByAxelra(liquidity,sender,destinationAddressReceiveToken);
         }else{
             uint256 beforeRemoveLiquidityBalanceToken0 = IAToken(token0).balanceOf(address(this));
             uint256 beforeRemoveLiquidityBalanceToken1 = IAToken(token1).balanceOf(address(this));
-            userLiquidityCrossChain[sender][pairLP] -= liquidity;
-            crossDexRouter.removeLiquidity(liquidity,token0,token1, address(this), (block.timestamp + 20 minutes));
+            ICrossDexPair(pairLP).removeLiquidityByAxelra(liquidity,sender,address(this));
             uint256 afterRemoveLiquidityBalanceToken0 = IAToken(token0).balanceOf(address(this));
             uint256 afterRemoveLiquidityBalanceToken1 = IAToken(token1).balanceOf(address(this));
             uint256 amountToSendToken0 = afterRemoveLiquidityBalanceToken0 - beforeRemoveLiquidityBalanceToken0;
@@ -173,12 +173,5 @@ contract ExcuteMainChainAxelraDexMsg  {
         IAToken(token).burn(to, amount);
     }
     
-    function redeemLiquidity(uint256 liquidity, address token0,  address token1) external  {
-        address pairLP = crossDexFactory.getPair(token0, token1);
-        require(userLiquidityCrossChain[msg.sender][pairLP] >= liquidity,"ExcuteAxelra: INSUFFICIENT_USER_LIQUIDITY");
-        userLiquidityCrossChain[msg.sender][pairLP] -= liquidity;
-        ICrossDexPair(pairLP).approve(address(crossDexRouter),liquidity);
-        crossDexRouter.removeLiquidity(liquidity,token0,token1, msg.sender, (block.timestamp + 20 minutes));
-    }
  
 }

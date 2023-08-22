@@ -26,12 +26,12 @@ contract CrossDexERC20 is ICrossDexERC20 {
         emit Transfer(from, address(0), value);
     }
 
-    function _approve(address owner, address spender, uint value) private {
+    function _approve(address owner, address spender, uint value) internal {
         allowance[owner][spender] = value;
         emit Approval(owner, spender, value);
     }
 
-    function _transfer(address from, address to, uint value) private {
+    function _transfer(address from, address to, uint value) internal {
         balanceOf[from] = balanceOf[from] - value ;
         balanceOf[to] = balanceOf[to] + value ;
         emit Transfer(from, to, value);
