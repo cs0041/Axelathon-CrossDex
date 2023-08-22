@@ -14,6 +14,7 @@ type Props = {}
 enum TabBar {
   Pos = 'Positions',
   Add = 'Add',
+  Remove = 'Remove'
 }
 
 function liquidity({}: Props) {
@@ -46,7 +47,14 @@ function liquidity({}: Props) {
             ${statusTabBar == TabBar.Add && 'text-blue-500'} `}
             onClick={() => setStatusTabBar(TabBar.Add)}
           >
-            + Add Liquidity
+            + Add
+          </button>
+          <button
+            className={`font-bold text-sm hover:opacity-70 transition-all
+            ${statusTabBar == TabBar.Remove && 'text-blue-500'} `}
+            onClick={() => setStatusTabBar(TabBar.Remove)}
+          >
+            - Remove
           </button>
         </div>
         {statusTabBar == TabBar.Pos && (
@@ -75,7 +83,10 @@ function liquidity({}: Props) {
                 <Disclosure>
                   {({ open }) => (
                     <>
-                      <Disclosure.Button className="bg-[#121A2A]  p-2  flex w-full justify-between  items-center  ">
+                      <Disclosure.Button
+                        className={`bg-[#121A2A]  p-2  flex w-full justify-between  items-center 
+                        ${open ? 'rounded-t-lg' : 'rounded-lg'} `}
+                      >
                         <div className="flex flex-row gap-2 bg-gray-700 py-2 px-3 rounded-lg">
                           <img src="logo.png" alt="logo" className="w-6 " />
                           <span>AXL - USDT</span>
@@ -90,9 +101,9 @@ function liquidity({}: Props) {
                           />
                         </div>
                       </Disclosure.Button>
-                      <Disclosure.Panel className="bg-[#121A2A] flex flex-col justify-between px-3 pt-4 pb-2 text-sm gap-2  ">
+                      <Disclosure.Panel className="bg-[#121A2A] rounded-b-lg flex flex-col justify-between px-3 pt-4 pb-2 text-sm gap-2  ">
                         <div className="flex flex-row justify-between items-center">
-                          <span>Total pooled tokens</span>
+                          <span>Your total pool tokens</span>
                           <span>12.21</span>
                         </div>
                         <div className="flex flex-row justify-between items-center">
@@ -104,7 +115,7 @@ function liquidity({}: Props) {
                           <span>20.51</span>
                         </div>
                         <div className="flex flex-row justify-between items-center">
-                          <span>Share of pool</span>
+                          <span>Your pool share</span>
                           <span>0.1%</span>
                         </div>
 
@@ -119,7 +130,7 @@ function liquidity({}: Props) {
                           <button
                             className=" flex w-full py-2 rounded-lg bg-blue-700 items-center justify-center 
                         hover:bg-blue-600 transition-all "
-                            onClick={() => setStatusTabBar(TabBar.Add)}
+                            onClick={() => setStatusTabBar(TabBar.Remove)}
                           >
                             <h1 className="text-xl font-bold">REMOVE</h1>
                           </button>
@@ -129,7 +140,6 @@ function liquidity({}: Props) {
                   )}
                 </Disclosure>
               </div>
-              
             </div>
           </div>
         )}
@@ -210,7 +220,7 @@ function liquidity({}: Props) {
               className="mt-2 flex w-full py-3 rounded-2xl bg-blue-700 items-center justify-center 
          hover:bg-blue-600 transition-all "
             >
-              <h1 className="text-xl font-bold">Swap</h1>
+              <h1 className="text-xl font-bold">Add Liquidity</h1>
             </button>
 
             <div
@@ -261,6 +271,106 @@ function liquidity({}: Props) {
                   />
                 </Switch>
               </div>
+              <div className="flex flex-row w-full items-center justify-between ">
+                <div>Recipient Address</div>
+                <div className="flex gap-1">
+                  <span> 0x313..4124</span>
+                  <span
+                    className="text-blue-500 underline cursor-pointer hover:opacity-60 transition-all"
+                    onClick={() => setShowModalEditAddress(true)}
+                  >
+                    Edit
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-row w-full items-center justify-between">
+                <div>Destination Chain ReceiveToken</div>
+                <MyListBox
+                  listItem={[
+                    { text: 'Avalanche' },
+                    { text: 'Fantom' },
+                    { text: 'Polygon' },
+                  ]}
+                />
+              </div>
+            </div>
+          </>
+        )}
+        {statusTabBar == TabBar.Remove && (
+          <>
+            <div className="InputOrder rounded-b-none gap-1 pt-2 pb-3 px-4">
+              <span className="text-gray-500">Amount LPs to Remove</span>
+              <div className="flex flex-row gap-2 ">
+                <input
+                  className="text-3xl  w-full   text-left  bg-transparent outline-none  text-white"
+                  placeholder="0"
+                  type="number"
+                  onKeyPress={(event) => {
+                    if (!/^[0-9]*[.,]?[0-9]*$/.test(event.key)) {
+                      event.preventDefault()
+                    }
+                  }}
+                />
+                <div>
+                  <MyListBox
+                    listItem={[
+                      { text: 'AXL-USDT' },
+                      { text: 'AXL-USDC' },
+                      { text: 'USDT-USDC' },
+                    ]}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 text-sm text-gray-400">
+                <span> Balance: 123123</span>
+                <span
+                  onClick={() => {}}
+                  className="text-blue-500 cursor-pointer hover:text-blue-700 transition-all"
+                >
+                  Max
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-row bg-[#121A2A] rounded-b-[15px] mt-[1px] py-2  px-4 items-center gap-2">
+              {true ? (
+                <>
+                  <SVGLoader />
+                  <p className="text-white text-xs">Fetching price...</p>
+                </>
+              ) : (
+                <></>
+              )}
+            </div>
+
+ 
+            <button
+              className="mt-2 flex w-full py-3 rounded-2xl bg-blue-700 items-center justify-center 
+         hover:bg-blue-600 transition-all "
+            >
+              <h1 className="text-xl font-bold">Remove Liquidity</h1>
+            </button>
+
+            <div
+              className="bg-[#121A2A] flex flex-row mt-2 rounded-lg py-2 px-4 justify-between items-center
+         text-gray-300  text-xs"
+            >
+              <div>
+                <p>LPs To Remove</p>
+                <p>Pooled AXL</p>
+                <p>Pooled USDT</p>
+                <p>Share of Pool</p>
+              </div>
+              <div className="text-right">
+                <p>12.04</p>
+                <p>30.32</p>
+                <p>12.12</p>
+                <p>0.1%</p>
+              </div>
+            </div>
+            <div
+              className="bg-[#121A2A] flex flex-col mt-2 rounded-lg py-2 px-4 justify-center items-start 
+           text-gray-300  text-xs gap-2 "
+            >
               <div className="flex flex-row w-full items-center justify-between ">
                 <div>Recipient Address</div>
                 <div className="flex gap-1">
