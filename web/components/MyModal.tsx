@@ -21,16 +21,6 @@ export default function MyModal({onClose,userAddress}:Props) {
 
   return (
     <>
-      {/* <div className="fixed inset-0 flex items-center justify-center">
-        <button
-          type="button"
-          onClick={openModal}
-          className="rounded-md bg-black bg-opacity-20 px-4 py-2 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
-        >
-          Open dialog
-        </button>
-      </div> */}
-
       <Transition appear show={isOpen} as={Fragment}>
         <Dialog as="div" className="relative z-10" onClose={closeModal}>
           <Transition.Child
@@ -45,7 +35,7 @@ export default function MyModal({onClose,userAddress}:Props) {
             <div className="fixed inset-0   backdrop-blur-sm" />
           </Transition.Child>
 
-          <div className="fixed inset-0 overflow-y-auto">
+          <div className="fixed top-1/4 left-0 right-0  overflow-y-auto">
             <div className="flex min-h-full items-center justify-center p-4 text-center">
               <Transition.Child
                 as={Fragment}
@@ -62,7 +52,7 @@ export default function MyModal({onClose,userAddress}:Props) {
                 >
                   <Dialog.Title
                     as="h3"
-                    className="text-xl font-bold  flex flex-row justify-between"
+                       className="text-xl font-bold  flex flex-row justify-between border-b-2 border-gray-700 pb-2"
                   >
                     <span>Recipient Address</span>
                     <button

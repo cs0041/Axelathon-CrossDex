@@ -8,6 +8,7 @@ import SVGLoader from '../components/SVGLoader'
 import MyModal from '../components/MyModal'
 import { useAccount } from 'wagmi'
 import MyListBox from '../components/MyListBox'
+import MySettingModal from '../components/MySettingModal'
 
 
 type Props = {}
@@ -15,14 +16,16 @@ type Props = {}
 function swap({}: Props) {
    const { address } = useAccount()
   const [showModalEditAddress, setShowModalEditAddress] = useState(false)
+  const [showModalSetting, setShowModalSetting] = useState(false)
    return (
      <div className="flex mt-14 justify-center items-center">
-       <div className="bg-[#0D111C] px-2 py-3 rounded-3xl border-[1px] border-[#fafafa4d]  max-w-[450px] min-w-[400px]">
+       <div className="relative bg-[#0D111C] px-2 py-3 rounded-3xl border-[1px] border-[#fafafa4d]  max-w-[450px] min-w-[400px]">
          <div className="flex flex-row justify-between items-center mb-2 px-2">
            <h1 className="font-bold text-base">Swap</h1>
            <div
              className="flex flex-row justify-center items-center gap-1 text-xs
             hover:opacity-60 cursor-pointer transition-all bg-blue-600 rounded-2xl py-1 px-3"
+             onClick={() => setShowModalSetting(true)}
            >
              <span>0.1% slippage</span>
              <Cog6ToothIcon className="h-6 w-6 " />
@@ -148,6 +151,9 @@ function swap({}: Props) {
            userAddress={address}
            onClose={() => setShowModalEditAddress(false)}
          />
+       )}
+       {showModalSetting && (
+         <MySettingModal onClose={() => setShowModalSetting(false)} />
        )}
      </div>
    )
