@@ -4,10 +4,27 @@ import { Fragment, useState } from 'react'
 
 interface Props {
   onClose: () => void
+  setSlippage: React.Dispatch<React.SetStateAction<number>>
+  slippage: number
+  setDeadline: React.Dispatch<React.SetStateAction<number>>
+  deadline: number
 }
 
-export default function MySettingModal({ onClose }: Props) {
-  let [isOpen, setIsOpen] = useState(true)
+enum DefaultSlippage {
+  one = 0.1,
+  two = 0.5,
+  three = 1,
+}
+
+export default function MySettingModal({
+  onClose,
+  setSlippage,
+  slippage,
+  setDeadline,
+  deadline,
+}: Props) {
+  const [isOpen, setIsOpen] = useState(true)
+  const [defaultSlippage, setDefaultSlippage] = useState<DefaultSlippage|undefined>(DefaultSlippage.one)
 
   function closeModal() {
     setIsOpen(false)
@@ -57,22 +74,44 @@ export default function MySettingModal({ onClose }: Props) {
                     <button
                       onClick={closeModal}
                       className=" absolute right-5 top-5 text-gray-500  hover:bg-gray-800 hover:text-white 
-                         p-1 rounded-lg  transition-all "
+                         p-1 rounded-lg  transition-all  focus-visible:outline-none"
                     >
                       <XMarkIcon className="h-6 w-6" />
                     </button>
                   </Dialog.Title>
                   <h1 className="mt-3 font-bold">Slippage Tolerance</h1>
                   <div className="flex flex-row justify-center items-center gap-2  mt-3 ">
-                    <button className="flex h-full bg-gray-700 rounded-md p-2 hover:bg-blue-600">
+                    <button
+                      className={`flex h-full rounded-md p-2 hover:bg-blue-600
+                    ${defaultSlippage == DefaultSlippage.one ? 'bg-blue-600' : 'bg-gray-700'}`}
+                      onClick={() => {
+                        setSlippage(0.1)
+                        setDefaultSlippage(DefaultSlippage.one)
+                      }}
+                    >
                       0.1%
                     </button>
-                    <button className="flex h-full bg-gray-700 rounded-md p-2 hover:bg-blue-600">
+                    <button
+                      className={`flex h-full rounded-md p-2 hover:bg-blue-600
+                    ${defaultSlippage == DefaultSlippage.two ? 'bg-blue-600' : 'bg-gray-700'}`}
+                      onClick={() => {
+                        setSlippage(0.5)
+                        setDefaultSlippage(DefaultSlippage.two)
+                      }}
+                    >
                       0.5%
                     </button>
-                    <button className="flex h-full bg-gray-700 rounded-md p-2 hover:bg-blue-600">
+                    <button
+                      className={`flex h-full rounded-md p-2 hover:bg-blue-600
+                    ${defaultSlippage == DefaultSlippage.three ? 'bg-blue-600' : 'bg-gray-700'}`}
+                      onClick={() => {
+                        setSlippage(1)
+                        setDefaultSlippage(DefaultSlippage.three)
+                      }}
+                    >
                       1.0%
                     </button>
+                    
                     <div className="InputOrder px-4">
                       <div className="flex flex-row justify-center items-center gap-3">
                         <input
@@ -80,11 +119,30 @@ export default function MySettingModal({ onClose }: Props) {
                             if (!/^[0-9]*[.,]?[0-9]*$/.test(event.key)) {
                               event.preventDefault()
                             }
+                            if (slippage >= 1000) {
+                              setSlippage(1000)
+                              event.preventDefault()
+                            }
+                            if (String(slippage).length >= 6) {
+                              event.preventDefault()
+                            }
                           }}
+                          value={slippage}
                           onChange={(e) => {
-                            //   setInputAddressToken0(e.target.value)
+                            setSlippage(Number(e.target.value))
+                            if(Number(e.target.value) == DefaultSlippage.one){
+                                setDefaultSlippage(DefaultSlippage.one)
+                            }
+                            else if(Number(e.target.value) == DefaultSlippage.two){
+                                setDefaultSlippage(DefaultSlippage.two)
+                            }
+                            else if(Number(e.target.value) == DefaultSlippage.three){
+                                setDefaultSlippage(DefaultSlippage.three)
+                            }else {
+                               setDefaultSlippage(undefined)
+                            }
                           }}
-                          className="    w-full py-2  text-left  bg-transparent outline-none  text-right"
+                          className="    w-full py-2   bg-transparent outline-none  text-right"
                           placeholder="0"
                           type="number"
                           required
@@ -101,9 +159,17 @@ export default function MySettingModal({ onClose }: Props) {
                           if (!/^[0-9]*$/.test(event.key)) {
                             event.preventDefault()
                           }
+                          if (deadline >= 60) {
+                            setDeadline(60)
+                            event.preventDefault()
+                          }
+                          if (String(deadline).length >= 2) {
+                            event.preventDefault()
+                          }
                         }}
+                        value={deadline}
                         onChange={(e) => {
-                          //   setInputAddressToken0(e.target.value)
+                          setDeadline(Number(e.target.value))
                         }}
                         className="   w-full py-2  text-right  bg-transparent outline-none  text-white"
                         placeholder="0"

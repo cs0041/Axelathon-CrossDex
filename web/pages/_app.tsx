@@ -2,7 +2,7 @@ import '../styles/globals.css'
 import type { AppProps } from 'next/app'
 
 import { WagmiConfig, createClient, configureChains } from 'wagmi'
-import { polygonMumbai } from 'wagmi/chains'
+import { polygonMumbai,avalancheFuji,fantomTestnet } from 'wagmi/chains'
 import { alchemyProvider } from 'wagmi/providers/alchemy'
 import { infuraProvider } from 'wagmi/providers/infura'
 import { publicProvider } from 'wagmi/providers/public'
@@ -40,8 +40,9 @@ const hardhat: Chain = {
 }
 
 
+
 const { chains, provider } = configureChains(
-  [polygonMumbai, hardhat],
+  [avalancheFuji, fantomTestnet,polygonMumbai],
   [
     alchemyProvider({ apiKey: '' }),
     infuraProvider({ apiKey: '' }),
