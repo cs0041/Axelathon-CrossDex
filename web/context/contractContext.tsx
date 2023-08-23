@@ -14,30 +14,24 @@ import {
 } from '../utils/UnitInEther'
 import { useNetwork } from 'wagmi'
 import { FindAddressTokenByChainID, FindRPCByChainID } from '../utils/findByChainId'
-import { ContractAddressRouter,ContractAddressFactory, AllowListTradeToken } from '../utils/valueConst'
+import { ContractAddressRouter,ContractAddressFactory, ChainIDAvalanchefuji } from '../utils/valueConst'
 
 interface IContract {
   getAmountsOut: (amountIn: string, addressTokenIn: string, addressTokenOut: string) =>Promise<string>
   getAmountsIn: (amountOut: string, addressTokenIn: string, addressTokenOut: string) =>Promise<string>
-  loadReservePair: (addressToken0: string, addressToken1: string) => Promise<void>
-  reserve0: number
-  reserve1: number
-  loadUserBalanceToken0: (addressToken0: string) => Promise<void>
-  loadUserBalanceToken1: (addressToken0: string) => Promise<void>
-  userBalanceToken0: string
-  userBalanceToken1: string
+  loadReservePairMainChain: (addressToken0: string, addressToken1: string) => Promise<void>
+  loadUserBalanceToken: (addressToken0: string, addressToken1: string) => Promise<void>
+  reserve:{[x: string]: number;}
+  userBalanceToken:{[x: string]: string;}
 }
 
 export const ContractContext = createContext<IContract>({
   getAmountsOut: async () => '',
   getAmountsIn: async () => '',
-  loadReservePair: async () => {},
-  reserve0: 0,
-  reserve1: 0,
-  loadUserBalanceToken0: async () => {},
-  loadUserBalanceToken1: async () => {},
-  userBalanceToken0: "",
-  userBalanceToken1: "",
+  loadReservePairMainChain: async () => {},
+  loadUserBalanceToken: async () => {},
+  reserve: {},
+  userBalanceToken: {},
 })
 
 interface ChildrenProps {
@@ -69,10 +63,8 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
   
   const [initialLoading, setInitialLoading] = useState(true)
   
-  const [reserve0, setReserve0] = useState<number>(0)
-  const [reserve1, setReserve1] = useState<number>(0)
-  const [userBalanceToken0, setUserBalanceToken0] = useState<string>('')
-  const [userBalanceToken1, setUserBalanceToken1] = useState<string>('')
+  const [reserve, setReserve] = useState<{[x: string]: number}>({})
+  const [userBalanceToken, setUserBalanceToken] = useState<{[x: string]: string}>({})
 
   
   const getAxelraTokenContract = (addressToken: string) => {
@@ -90,8 +82,16 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
     if (!window.ethereum) return alert('Please install metamask')
     const loadInint = async() => {
       addlistenerEvents()
-      loadUserBalanceToken0(FindAddressTokenByChainID(chain!.id,true))
-      loadUserBalanceToken1(FindAddressTokenByChainID(chain!.id, false))
+      if (chain){
+        loadUserBalanceToken(
+          FindAddressTokenByChainID(chain.id, true),
+          FindAddressTokenByChainID(chain.id, false)
+        )
+        loadReservePairMainChain(
+          FindAddressTokenByChainID(ChainIDAvalanchefuji, true),
+          FindAddressTokenByChainID(ChainIDAvalanchefuji, false)
+        )
+      }
     }
     loadInint()
     setInitialLoading(false)
@@ -127,7 +127,7 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
     }
   }
 
-  const loadReservePair = async (addressToken0: string,addressToken1: string) => {
+  const loadReservePairMainChain = async (addressToken0: string,addressToken1: string) => {
     try {
       if (!window.ethereum) return
       const pairLP = await contractCrossDexFactory.getPair(
@@ -140,35 +140,42 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
         providerRPCAvalanchefuji
       ) as CrossDexPair
       const result = await contractCrossDexPair.getReserves()
-      setReserve0(Number(toEther(result._reserve0)))
-      setReserve1(Number(toEther(result._reserve1)))
+      const [address0, address1] = await Promise.all([
+        contractCrossDexPair.token0(),
+        contractCrossDexPair.token1(),
+      ])
+      const DTO = {
+        [address0]: Number(toEther(result._reserve0)),
+        [address1]: Number(toEther(result._reserve1)),
+      }
+      setReserve(DTO)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  const loadUserBalanceToken = async (addressToken0: string,addressToken1: string) => {
+    try {
+      if (!window.ethereum) return
+
+
+      const contractToken0 = getAxelraTokenContract(addressToken0) 
+      const contractToken1 = getAxelraTokenContract(addressToken1) 
+      const accounts = (await window.ethereum.request({ method: 'eth_accounts', }))[0]
+      const [result0, result1] = await Promise.all([
+        contractToken0.balanceOf(accounts),
+        contractToken1.balanceOf(accounts),
+      ])
+      const DTO = {
+        [addressToken0]: toEther(result0),
+        [addressToken1]: toEther(result1),
+      }
+      console.log('DTO',DTO)
+      setUserBalanceToken(DTO)
     } catch (error) {
       console.log(error)
     }
   }
 
-  const loadUserBalanceToken0 = async (addressToken0: string) => {
-    try {
-      if (!window.ethereum) return
-      const contractToken0 = getAxelraTokenContract(addressToken0) 
-      const accounts = (await window.ethereum.request({ method: 'eth_accounts', }))[0]
-      const result = await contractToken0.balanceOf(accounts)
-      setUserBalanceToken0(toEther(result))
-    } catch (error) {
-      console.log(error)
-    }
-  }
-  const loadUserBalanceToken1 = async (addressToken0: string) => {
-    try {
-      if (!window.ethereum) return
-      const contractToken0 = getAxelraTokenContract(addressToken0) 
-      const accounts = (await window.ethereum.request({ method: 'eth_accounts', }))[0]
-      const result = await contractToken0.balanceOf(accounts)
-      setUserBalanceToken1(toEther(result))
-    } catch (error) {
-      console.log(error)
-    }
-  }
 
 
   
@@ -198,13 +205,10 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
       value={{
         getAmountsOut,
         getAmountsIn,
-        loadReservePair,
-        reserve0,
-        reserve1,
-        loadUserBalanceToken0,
-        loadUserBalanceToken1,
-        userBalanceToken0,
-        userBalanceToken1,
+        loadReservePairMainChain,
+        loadUserBalanceToken,
+        reserve,
+        userBalanceToken,
       }}
     >
       {!initialLoading && children}

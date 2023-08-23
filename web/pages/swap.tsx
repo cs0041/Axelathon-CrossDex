@@ -1,18 +1,20 @@
-import React, { useContext, useState }  from 'react'
+import React, { useContext, useEffect, useState }  from 'react'
 import {
   Cog6ToothIcon,
   ArrowDownCircleIcon,
 } from '@heroicons/react/24/solid'
 import {
   InformationCircleIcon,
-} from '@heroicons/react/24/outline'
+} from '@heroicons/react/20/solid'
 import SVGLoader from '../components/SVGLoader'
 import MyRecipientAddressModal from '../components/MyRecipientAddressModal'
-import { useAccount } from 'wagmi'
-import MyListBox from '../components/MyListBox'
+import { useAccount, useNetwork } from 'wagmi'
+import MyListBoxChain from '../components/MyListBoxChain'
 import MySettingModal from '../components/MySettingModal'
 import { ContractContext } from '../context/contractContext'
 import { shortenAddress } from '../utils/shortenAddress'
+import { FindAddressTokenByChainID } from '../utils/findByChainId'
+import { ChainIDAvalanchefuji, listBoxChainName } from '../utils/valueConst'
 
 
 type Props = {}
@@ -21,14 +23,15 @@ function swap({}: Props) {
   const {
     getAmountsOut,
     getAmountsIn,
-    loadReservePair,
-    reserve0,
-    reserve1,
-    userBalanceToken0,
-    userBalanceToken1,
+    loadReservePairMainChain,
+    reserve,
+    userBalanceToken,
+    loadUserBalanceToken,
   } = useContext(ContractContext)
 
+  // wagmi
   const { address } = useAccount()
+  const { chain } = useNetwork()
 
   // Modal
   const [showModalEditAddress, setShowModalEditAddress] = useState(false)
@@ -44,11 +47,23 @@ function swap({}: Props) {
   const [deadline, setDeadline] = useState<number>(20)
 
   // modal setting Recipient Address
-  const [recipientAddress, setRecipientAddress] = useState<string|undefined>(address)
+  const [recipientAddress, setRecipientAddress] = useState<string | undefined>(
+    address
+  )
 
   //data input
   const [inputIn, setInputIn] = useState<string>('')
   const [inputOut, setInputOut] = useState<string>('')
+  // list trade token
+  const [addressToken0MainChain, setAddressToken0MainChain] = useState<string>(FindAddressTokenByChainID(ChainIDAvalanchefuji,true))
+  const [addressToken1MainChain, setAddressToken1MainChain] = useState<string>(FindAddressTokenByChainID(ChainIDAvalanchefuji,false))
+  const [addressToken0SecondaryChain, setAddressToken0SecondaryChain] = useState<string>(FindAddressTokenByChainID(chain?.id,true))
+  const [addressToken1SecondaryChain, setAddressToken1SecondaryChain] = useState<string>(FindAddressTokenByChainID(chain?.id,false))
+
+  const [symbolToken0, setSymbolToken0] = useState<string>('USDT')
+  const [symbolToken1, setSymbolToken1] = useState<string>('USDC')
+  
+
   return (
     <div className="flex mt-14 justify-center items-center">
       <div className="relative bg-[#0D111C] px-2 py-3 rounded-3xl border-[1px] border-[#fafafa4d]   w-[450px]">
@@ -65,12 +80,12 @@ function swap({}: Props) {
         </div>
 
         <div
-          className={`InputOrder rounded-b-none gap-1 pt-2 pb-3 px-4
+          className={`InputOrder  gap-1 pt-2 pb-3 px-4
         ${loadingIn && 'opacity-50'}
         `}
         >
           <span className="text-gray-500">You pay</span>
-          <div className="flex flex-row gap-2">
+          <div className="flex flex-row gap-3">
             <input
               className="text-3xl  w-full   text-left  bg-transparent outline-none  text-white"
               placeholder="0"
@@ -87,29 +102,34 @@ function swap({}: Props) {
                 setInputIn(e.target.value)
                 const amountOut = await getAmountsOut(
                   e.target.value,
-                  '0x974333304df277F849f21aa311aF6e0050C22623',
-                  '0xC8d848847CAC98300f1A48B2ed26eD7fF3aDdbD1'
+                  addressToken0MainChain,
+                  addressToken1MainChain
                 )
                 setInputOut(amountOut)
                 setLoadingPrice(false)
                 setLoadingOut(false)
               }}
             />
-            <MyListBox
-              listItem={[{ text: 'ETH' }, { text: 'USDT' }, { text: 'AXL' }]}
-            />
+            <div className="bg-[#293249]   flex flex-row justify-center items-center px-3 py-0   gap-1 rounded-lg text-sm">
+              <img src="logo.png" alt="logo" className="w-6 h-6" />
+              <span>{symbolToken0}</span>
+            </div>
           </div>
           <div className="flex justify-end gap-2 text-sm text-gray-400">
-            <span> Balance: {userBalanceToken0.slice(0, -10)}</span>
+            <span>
+              {' '}
+              Balance:{' '}
+              {Number(userBalanceToken[addressToken0SecondaryChain]).toFixed(6)}
+            </span>
             <span
               onClick={async () => {
                 setLoadingPrice(true)
                 setLoadingOut(true)
-                setInputIn(userBalanceToken0)
+                setInputIn(userBalanceToken[addressToken0SecondaryChain])
                 const amountOut = await getAmountsOut(
-                  userBalanceToken0,
-                  '0x974333304df277F849f21aa311aF6e0050C22623',
-                  '0xC8d848847CAC98300f1A48B2ed26eD7fF3aDdbD1'
+                  userBalanceToken[addressToken0SecondaryChain],
+                  addressToken0MainChain,
+                  addressToken1MainChain
                 )
                 setInputOut(amountOut)
                 setLoadingPrice(false)
@@ -122,7 +142,23 @@ function swap({}: Props) {
           </div>
         </div>
 
-        <div className="flex justify-center items-center mt-3 mb-3">
+        <div
+          className="flex justify-center items-center mt-3 mb-3"
+          onClick={async () => {
+            const tempaddressToken0MainChain = addressToken0MainChain
+            const tempaddressToken0SecondaryChain = addressToken0SecondaryChain
+            const tempsymbolToken0 = symbolToken0
+            setAddressToken0MainChain(addressToken1MainChain)
+            setAddressToken1MainChain(tempaddressToken0MainChain)
+            setAddressToken0SecondaryChain(addressToken1SecondaryChain)
+            setAddressToken1SecondaryChain(tempaddressToken0SecondaryChain)
+            setSymbolToken0(symbolToken1)
+            setSymbolToken1(tempsymbolToken0)
+
+            setInputIn('')
+            setInputOut('')
+          }}
+        >
           <ArrowDownCircleIcon className="h-8 w-8 text-white cursor-pointer hover:scale-105 hover:opacity-70 transition-all " />
         </div>
 
@@ -132,7 +168,7 @@ function swap({}: Props) {
         `}
         >
           <span className="text-gray-500">You receive</span>
-          <div className="flex flex-row gap-2 ">
+          <div className="flex flex-row gap-3 ">
             <input
               className="text-3xl  w-full   text-left  bg-transparent outline-none  text-white"
               placeholder="0"
@@ -149,20 +185,25 @@ function swap({}: Props) {
                 setInputOut(e.target.value)
                 const amountIn = await getAmountsIn(
                   e.target.value,
-                  '0x974333304df277F849f21aa311aF6e0050C22623',
-                  '0xC8d848847CAC98300f1A48B2ed26eD7fF3aDdbD1'
+                  addressToken0MainChain,
+                  addressToken1MainChain
                 )
                 setInputIn(amountIn)
                 setLoadingPrice(false)
                 setLoadingIn(false)
               }}
             />
-            <MyListBox
-              listItem={[{ text: 'ETH' }, { text: 'USDT' }, { text: 'AXL' }]}
-            />
+            <div className="bg-[#293249]   flex flex-row justify-center items-center px-3 py-0   gap-1 rounded-lg text-sm">
+              <img src="logo.png" alt="logo" className="w-6 h-6" />
+              <span>{symbolToken1}</span>
+            </div>
           </div>
           <div className="flex justify-end gap-2 text-sm text-gray-400">
-            <span> Balance: {userBalanceToken1.slice(0, -10)}</span>
+            <span>
+              {' '}
+              Balance:{' '}
+              {Number(userBalanceToken[addressToken1SecondaryChain]).toFixed(6)}
+            </span>
           </div>
         </div>
         <div className="flex flex-row bg-[#121A2A] rounded-b-[15px] mt-[1px] py-2  px-4 items-center gap-2">
@@ -178,25 +219,47 @@ function swap({}: Props) {
                   Please input amount
                 </span>
               ) : (
-                <span className="text-xs">
-                  1 = {(Number(inputOut) / Number(inputIn)).toFixed(8)}
-                </span>
+                <div className="flex flex-row gap-1">
+                  <InformationCircleIcon className="h-4 w-4 text-white  " />
+                  <span className="text-xs">
+                    1 {symbolToken0} ={' '}
+                    {(Number(inputOut) / Number(inputIn)).toFixed(6)}{' '}
+                    {symbolToken1}
+                  </span>
+                </div>
               )}
             </>
           )}
         </div>
         <button
-          disabled={loadingPrice}
+          disabled={
+            loadingPrice ||
+            reserve[addressToken1MainChain] < Number(inputOut) ||
+            Number(userBalanceToken[addressToken0SecondaryChain]) <
+              Number(inputIn)
+          }
           className={`mt-2 flex w-full py-3 rounded-2xl  items-center justify-center 
           transition-all 
          ${
            loadingPrice
              ? 'bg-gray-600 cursor-not-allowed'
+             : reserve[addressToken1MainChain] < Number(inputOut)
+             ? 'bg-gray-600 cursor-not-allowed'
+             : Number(userBalanceToken[addressToken0SecondaryChain]) <
+               Number(inputIn)
+             ? 'bg-gray-600 cursor-not-allowed'
              : 'bg-blue-700 hover:bg-blue-600'
          }
          `}
         >
-          <h1 className="text-xl font-bold">Swap</h1>
+          <h1 className="text-xl font-bold">
+            {reserve[addressToken1MainChain] < Number(inputOut)
+              ? 'Insufficient liquidity balance'
+              : Number(userBalanceToken[addressToken0SecondaryChain]) <
+                Number(inputIn)
+              ? 'Insufficient user balance'
+              : 'Swap'}
+          </h1>
         </button>
 
         <div
@@ -232,17 +295,10 @@ function swap({}: Props) {
           </div>
           <div className="flex flex-row w-full items-center justify-between">
             <div>Destination Chain ReceiveToken</div>
-            <MyListBox
-              listItem={[
-                { text: 'Avalanche' },
-                { text: 'Fantom' },
-                { text: 'Polygon' },
-              ]}
-            />
+            <MyListBoxChain listItem={listBoxChainName} />
           </div>
         </div>
       </div>
-
       {showModalEditAddress && (
         <MyRecipientAddressModal
           recipientAddress={recipientAddress}
@@ -259,6 +315,7 @@ function swap({}: Props) {
           deadline={deadline}
         />
       )}
+      <div className="bg -z-50" />
     </div>
   )
 }

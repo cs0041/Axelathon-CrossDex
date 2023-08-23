@@ -1,13 +1,15 @@
 import React, { useState } from 'react'
-import MyListBox from '../components/MyListBox'
+import MyListBoxChain from '../components/MyListBoxChain'
 import { PlusCircleIcon,InboxStackIcon, InboxIcon} from '@heroicons/react/24/solid'
-import { QuestionMarkCircleIcon,ChevronUpIcon} from '@heroicons/react/24/outline'
+import { ChevronUpIcon} from '@heroicons/react/24/outline'
+import { QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
 import { Disclosure } from '@headlessui/react'
 import SVGLoader from '../components/SVGLoader'
 import { useAccount } from 'wagmi'
-import MyModal from '../components/MyModal'
+import MyRecipientAddressModal from '../components/MyRecipientAddressModal'
 import { Switch } from '@headlessui/react'
 import { LightTooltip } from '../utils/muiStyled'
+import { listBoxChainName, listBoxPairLPMainChain } from '../utils/valueConst'
 
 type Props = {}
 
@@ -158,13 +160,10 @@ function liquidity({}: Props) {
                     }
                   }}
                 />
-                <MyListBox
-                  listItem={[
-                    { text: 'ETH' },
-                    { text: 'USDT' },
-                    { text: 'AXL' },
-                  ]}
-                />
+                <div className="bg-[#293249]   flex flex-row justify-center items-center px-3 py-0   gap-1 rounded-lg text-sm">
+                  <img src="logo.png" alt="logo" className="w-6 h-6" />
+                  <span>USDT</span>
+                </div>
               </div>
               <div className="flex justify-end gap-2 text-sm text-gray-400">
                 <span> Balance: 123123</span>
@@ -194,13 +193,10 @@ function liquidity({}: Props) {
                     }
                   }}
                 />
-                <MyListBox
-                  listItem={[
-                    { text: 'ETH' },
-                    { text: 'USDT' },
-                    { text: 'AXL' },
-                  ]}
-                />
+                <div className="bg-[#293249]   flex flex-row justify-center items-center px-3 py-0   gap-1 rounded-lg text-sm">
+                  <img src="logo.png" alt="logo" className="w-6 h-6" />
+                  <span>USDC</span>
+                </div>
               </div>
               <div className="flex justify-end gap-2 text-sm text-gray-400">
                 <span> Balance: 123123</span>
@@ -285,13 +281,7 @@ function liquidity({}: Props) {
               </div>
               <div className="flex flex-row w-full items-center justify-between">
                 <div>Destination Chain ReceiveToken</div>
-                <MyListBox
-                  listItem={[
-                    { text: 'Avalanche' },
-                    { text: 'Fantom' },
-                    { text: 'Polygon' },
-                  ]}
-                />
+                <MyListBoxChain listItem={listBoxChainName} />
               </div>
             </div>
           </>
@@ -311,14 +301,9 @@ function liquidity({}: Props) {
                     }
                   }}
                 />
-                <div>
-                  <MyListBox
-                    listItem={[
-                      { text: 'AXL-USDT' },
-                      { text: 'AXL-USDC' },
-                      { text: 'USDT-USDC' },
-                    ]}
-                  />
+                <div className="bg-[#293249]   flex flex-row justify-center w-6/12 items-center px-3 py-0   gap-1 rounded-lg text-sm">
+                  <img src="logo.png" alt="logo" className="w-6 h-6" />
+                  <span>USDT-USDC</span>
                 </div>
               </div>
               <div className="flex justify-end gap-2 text-sm text-gray-400">
@@ -342,7 +327,6 @@ function liquidity({}: Props) {
               )}
             </div>
 
- 
             <button
               className="mt-2 flex w-full py-3 rounded-2xl bg-blue-700 items-center justify-center 
          hover:bg-blue-600 transition-all "
@@ -385,13 +369,7 @@ function liquidity({}: Props) {
               </div>
               <div className="flex flex-row w-full items-center justify-between">
                 <div>Destination Chain ReceiveToken</div>
-                <MyListBox
-                  listItem={[
-                    { text: 'Avalanche' },
-                    { text: 'Fantom' },
-                    { text: 'Polygon' },
-                  ]}
-                />
+                <MyListBoxChain listItem={listBoxChainName} />
               </div>
             </div>
           </>
@@ -399,9 +377,10 @@ function liquidity({}: Props) {
       </div>
 
       {showModalEditAddress && (
-        <MyModal
-          userAddress={address}
+        <MyRecipientAddressModal
+          recipientAddress={address}
           onClose={() => setShowModalEditAddress(false)}
+          setRecipientAddress={() => {}}
         />
       )}
     </div>

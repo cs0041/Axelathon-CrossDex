@@ -56,18 +56,18 @@ function Navbar() {
         </div>
         <ConnectButton
           label="connect web3"
-            accountStatus={{
-              smallScreen: 'address',
-              largeScreen: 'full',
-            }}
-            showBalance={{
-              smallScreen: false,
-              largeScreen: true,
-            }}
-            chainStatus={{
-              smallScreen: 'full',
-              largeScreen: 'full',
-            }}
+          accountStatus={{
+            smallScreen: 'address',
+            largeScreen: 'full',
+          }}
+          showBalance={{
+            smallScreen: false,
+            largeScreen: true,
+          }}
+          chainStatus={{
+            smallScreen: 'full',
+            largeScreen: 'full',
+          }}
         />
       </div>
     </div>

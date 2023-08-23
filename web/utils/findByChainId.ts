@@ -21,28 +21,28 @@ export function FindRPCByChainID(chainID: number): string {
 }
 
  
-export function FindAddressTokenByChainID(chainID: number,Token0or1: boolean): string {
+export function FindAddressTokenByChainID(chainID: number | undefined,isToken0: boolean): string {
     let addressToken = ""
     switch (chainID) {
       case ChainIDAvalanchefuji:
-        addressToken = Token0or1
-          ? AllowListTradeToken.Avalanche.Token0
-          : AllowListTradeToken.Avalanche.Token1
+        addressToken = isToken0
+          ? AllowListTradeToken.Avalanche.Token0.contractAddress
+          : AllowListTradeToken.Avalanche.Token1.contractAddress
         break
       case ChainIDMumbai:
-          addressToken = Token0or1
-            ? AllowListTradeToken.Avalanche.Token0
-            : AllowListTradeToken.Avalanche.Token1
+          addressToken = isToken0
+            ? AllowListTradeToken.Avalanche.Token0.contractAddress
+            : AllowListTradeToken.Avalanche.Token1.contractAddress
         break
       case ChainIDFantomTestnet:
-          addressToken = Token0or1
-            ? AllowListTradeToken.Fantom.Token0
-            : AllowListTradeToken.Fantom.Token1
+          addressToken = isToken0
+            ? AllowListTradeToken.Fantom.Token0.contractAddress
+            : AllowListTradeToken.Fantom.Token1.contractAddress
         break
       default:
-          addressToken = Token0or1
-            ? AllowListTradeToken.Avalanche.Token0
-            : AllowListTradeToken.Avalanche.Token1
+          addressToken = isToken0
+            ? AllowListTradeToken.Avalanche.Token0.contractAddress
+            : AllowListTradeToken.Avalanche.Token1.contractAddress
         break
     }
    

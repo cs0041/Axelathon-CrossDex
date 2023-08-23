@@ -2,17 +2,13 @@ import { Fragment, useState } from 'react'
 import { Listbox, Transition } from '@headlessui/react'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
 
-const listItem = [
-  { text: 'Avalanche' },
-  { text: 'Fantom' },
-  { text: 'Polygon' },
-]
+ 
 
 interface Props {
-  listItem: { text: string }[]
+  listItem: { symbol: string,contractAddress:string }[]
 }
 
-export default function MyListBox({ listItem }: Props) {
+export default function MyListBoxTrade({ listItem }: Props) {
   const [textselected, setSelected] = useState(listItem[0])
 
   return (
@@ -22,7 +18,7 @@ export default function MyListBox({ listItem }: Props) {
           <Listbox.Button className="relative w-full cursor-pointer hover:bg-gray-700 rounded-lg bg-[#293249] py-1 pl-2 text-left ">
             <div className="flex flex-row gap-1  items-center">
               <img src="logo.png" alt="logo" className="w-6 " />
-              <span className="block truncate">{textselected.text}</span>
+              <span className="block truncate">{textselected.symbol}</span>
             </div>
             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
               <ChevronUpDownIcon
@@ -52,11 +48,11 @@ export default function MyListBox({ listItem }: Props) {
                     <>
                       <div
                         className={` flex flex-row gap-1 ${
-                          textselected.text == item.text ? 'text-blue-600' : ''
+                          textselected.symbol == item.symbol ? 'text-blue-600' : ''
                         }`}
                       >
                         <img src="logo.png" alt="logo" className="w-6 " />
-                        <span>{item.text}</span>
+                        <span>{item.symbol}</span>
                       </div>
                     </>
                   )}
