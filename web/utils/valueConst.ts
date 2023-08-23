@@ -4,6 +4,7 @@ export const ChainIDMumbai = 80001
 export const ChainIDFantomTestnet = 4002
 export const ContractAddressFactory = '0x9ed60E9C2b11243daF4F85981bc6eEC210C26561'
 export const ContractAddressRouter = '0xdc5Faa26e349c41CD17110B5EB295A980EFA9aBA'
+export const ChainNameMainChainDex = 'Avalanche'
 export const AllowListTradeToken = {
   Fantom: {
     Token0: {
@@ -24,6 +25,14 @@ export const AllowListTradeToken = {
       symbol: 'USDC',
       contractAddress: '0xC8d848847CAC98300f1A48B2ed26eD7fF3aDdbD1',
     },
+  },
+}
+export const listAxelra = {
+  Fantom: {
+    contractAddress: '0x6AF4a24D6E07b494d0Ae201d7376008806e89A64',
+  },
+  Avalanche: {
+    contractAddress: '0x1d7557Da341B5521346d754D2a98AA1488318E2c',
   },
 }
 

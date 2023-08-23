@@ -17,7 +17,8 @@ import {
 import { Chain } from 'wagmi/chains'
 import { ContractProvider } from '../context/contractContext'
 import Navbar from '../components/Navbar'
-
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 const hardhat: Chain = {
   id: 31337,
@@ -76,6 +77,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         >
           <Navbar/>
           <Component {...pageProps} />
+          <ToastContainer position='top-right' className="!top-20" theme="dark"   />
         </RainbowKitProvider>
       </WagmiConfig>
     </ContractProvider>

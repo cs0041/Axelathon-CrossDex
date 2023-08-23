@@ -5,11 +5,12 @@ import { ChevronUpIcon} from '@heroicons/react/24/outline'
 import { QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
 import { Disclosure } from '@headlessui/react'
 import SVGLoader from '../components/SVGLoader'
-import { useAccount } from 'wagmi'
+import { useAccount, useNetwork } from 'wagmi'
 import MyRecipientAddressModal from '../components/MyRecipientAddressModal'
 import { Switch } from '@headlessui/react'
 import { LightTooltip } from '../utils/muiStyled'
 import { listBoxChainName, listBoxPairLPMainChain } from '../utils/valueConst'
+import { GetChainNameByChainId } from '../utils/findByChainId'
 
 type Props = {}
 
@@ -20,11 +21,19 @@ enum TabBar {
 }
 
 function liquidity({}: Props) {
+  // wagmi
 
-    const { address } = useAccount()
-    const [statusTabBar, setStatusTabBar] = useState<TabBar>(TabBar.Pos)
-    const [showModalEditAddress, setShowModalEditAddress] = useState(false)
-    const [enabled, setEnabled] = useState(false)
+  const { chain } = useNetwork()
+  const { address } = useAccount()
+  
+  const [statusTabBar, setStatusTabBar] = useState<TabBar>(TabBar.Pos)
+  const [showModalEditAddress, setShowModalEditAddress] = useState(false)
+  const [enabled, setEnabled] = useState(false)
+
+  // Destination  chain name
+  const [destinationChainName, setDestinationChainName] = useState<string>(
+    GetChainNameByChainId(chain?.id)
+  )
   return (
     <div className="flex mt-14 justify-center items-center">
       <div className="relative bg-[#0D111C] px-2 py-3 rounded-3xl border-[1px] border-[#fafafa4d]  w-[450px]">
@@ -281,7 +290,11 @@ function liquidity({}: Props) {
               </div>
               <div className="flex flex-row w-full items-center justify-between">
                 <div>Destination Chain ReceiveToken</div>
-                <MyListBoxChain listItem={listBoxChainName} />
+                <MyListBoxChain
+                  listItem={listBoxChainName}
+                  nowChainName={destinationChainName}
+                  setDestinationChainName={setDestinationChainName}
+                />
               </div>
             </div>
           </>
@@ -369,7 +382,11 @@ function liquidity({}: Props) {
               </div>
               <div className="flex flex-row w-full items-center justify-between">
                 <div>Destination Chain ReceiveToken</div>
-                <MyListBoxChain listItem={listBoxChainName} />
+                <MyListBoxChain
+                  listItem={listBoxChainName}
+                  nowChainName={destinationChainName}
+                  setDestinationChainName={setDestinationChainName}
+                />
               </div>
             </div>
           </>

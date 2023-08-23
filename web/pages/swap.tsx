@@ -13,9 +13,9 @@ import MyListBoxChain from '../components/MyListBoxChain'
 import MySettingModal from '../components/MySettingModal'
 import { ContractContext } from '../context/contractContext'
 import { shortenAddress } from '../utils/shortenAddress'
-import { FindAddressTokenByChainID } from '../utils/findByChainId'
-import { ChainIDAvalanchefuji, listBoxChainName } from '../utils/valueConst'
-
+import { FindAddressTokenByChainID, GetChainNameByChainId } from '../utils/findByChainId'
+import { ChainIDAvalanchefuji, ChainNameMainChainDex, listBoxChainName } from '../utils/valueConst'
+import { notificationToast } from '../utils/notificationToastify'
 
 type Props = {}
 
@@ -27,6 +27,7 @@ function swap({}: Props) {
     reserve,
     userBalanceToken,
     loadUserBalanceToken,
+    sendTxBridgeSwap,
   } = useContext(ContractContext)
 
   // wagmi
@@ -47,9 +48,10 @@ function swap({}: Props) {
   const [deadline, setDeadline] = useState<number>(20)
 
   // modal setting Recipient Address
-  const [recipientAddress, setRecipientAddress] = useState<string | undefined>(
-    address
-  )
+  const [recipientAddress, setRecipientAddress] = useState<string | undefined>( address)
+  
+  // Destination  chain name
+  const [destinationChainName,setDestinationChainName] = useState<string>( GetChainNameByChainId(chain?.id))
 
   //data input
   const [inputIn, setInputIn] = useState<string>('')
@@ -110,7 +112,7 @@ function swap({}: Props) {
                 setLoadingOut(false)
               }}
             />
-            <div className="bg-[#293249]   flex flex-row justify-center items-center px-3 py-0   gap-1 rounded-lg text-sm">
+            <div className="bg-[#293249]   flex flex-row justify-center items-center px-4 py-0   gap-1 rounded-lg text-sm">
               <img src="logo.png" alt="logo" className="w-6 h-6" />
               <span>{symbolToken0}</span>
             </div>
@@ -193,7 +195,7 @@ function swap({}: Props) {
                 setLoadingIn(false)
               }}
             />
-            <div className="bg-[#293249]   flex flex-row justify-center items-center px-3 py-0   gap-1 rounded-lg text-sm">
+            <div className="bg-[#293249]   flex flex-row justify-center items-center px-4 py-0   gap-1 rounded-lg text-sm">
               <img src="logo.png" alt="logo" className="w-6 h-6" />
               <span>{symbolToken1}</span>
             </div>
@@ -232,6 +234,18 @@ function swap({}: Props) {
           )}
         </div>
         <button
+          onClick={() => {
+            notificationToast(
+              sendTxBridgeSwap(
+                inputIn,
+                '0',
+                addressToken0SecondaryChain,
+                addressToken1SecondaryChain,
+                recipientAddress!,
+                destinationChainName
+              )
+            )
+          }}
           disabled={
             loadingPrice ||
             reserve[addressToken1MainChain] < Number(inputOut) ||
@@ -271,33 +285,58 @@ function swap({}: Props) {
             <p>Price Impact</p>
             <p>Liquidity Provider Fee</p>
           </div>
-          <div className="text-right">
-            <p>0.00</p>
-            <p>0%</p>
+          <div className="flex flex-col justify-center items-end">
+            {loadingPrice ? (
+              <div>calculating...</div>
+            ) : (
+              <p>{(Number(inputOut) * ((100 - slippage) / 100)).toFixed(6)}</p>
+            )}
+            {loadingPrice ? (
+              <div>calculating...</div>
+            ) : (
+              <p>
+                {(
+                  (reserve[addressToken1MainChain] /
+                    reserve[addressToken0MainChain] -
+                    Number(inputOut) / Number(inputIn)) /
+                  (reserve[addressToken1MainChain] /
+                    reserve[addressToken0MainChain] /
+                    100)
+                ).toFixed(2)}
+                %
+              </p>
+            )}
+
             <p>0% fee</p>
           </div>
         </div>
-        <div
-          className="bg-[#121A2A] flex flex-col mt-2 rounded-lg py-2 px-4 justify-center items-start 
+        {GetChainNameByChainId(chain?.id) != ChainNameMainChainDex && (
+          <div
+            className="bg-[#121A2A] flex flex-col mt-2 rounded-lg py-2 px-4 justify-center items-start 
            text-gray-300  text-xs "
-        >
-          <div className="flex flex-row w-full items-center justify-between ">
-            <div>Recipient Address</div>
-            <div className="flex gap-1">
-              <span> {shortenAddress(recipientAddress)} </span>
-              <span
-                className="text-blue-500 underline cursor-pointer hover:opacity-60 transition-all"
-                onClick={() => setShowModalEditAddress(true)}
-              >
-                Edit
-              </span>
+          >
+            <div className="flex flex-row w-full items-center justify-between ">
+              <div>Recipient Address</div>
+              <div className="flex gap-1">
+                <span> {shortenAddress(recipientAddress)} </span>
+                <span
+                  className="text-blue-500 underline cursor-pointer hover:opacity-60 transition-all"
+                  onClick={() => setShowModalEditAddress(true)}
+                >
+                  Edit
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-row w-full items-center justify-between">
+              <div>Destination Chain ReceiveToken</div>
+              <MyListBoxChain
+                listItem={listBoxChainName}
+                nowChainName={destinationChainName}
+                setDestinationChainName={setDestinationChainName}
+              />
             </div>
           </div>
-          <div className="flex flex-row w-full items-center justify-between">
-            <div>Destination Chain ReceiveToken</div>
-            <MyListBoxChain listItem={listBoxChainName} />
-          </div>
-        </div>
+        )}
       </div>
       {showModalEditAddress && (
         <MyRecipientAddressModal

@@ -3,8 +3,9 @@ import { ethers } from 'ethers'
 import  artifactCrossDexRouter from '../../smart contract/artifacts/contracts/CrossDex/CrossDexRouter.sol/CrossDexRouter.json'
 import  artifactCrossDexFactory from '../../smart contract/artifacts/contracts/CrossDex/CrossDexFactory.sol/CrossDexFactory.json'
 import  artifactCrossDexPair from '../../smart contract/artifacts/contracts/CrossDex/CrossDexPair.sol/CrossDexPair.json'
+import  artifactSecondaryChainAxelraDexMsg from '../../smart contract/artifacts/contracts/Axelra/SecondaryChainAxelraDexMsg.sol/SecondaryChainAxelraDexMsg.json'
 import  artifactAxelraToken from '../../smart contract/artifacts/contracts/Axelra/AxelraToken.sol/axelraToken0.json'
-import { CrossDexRouter,CrossDexFactory,CrossDexPair,AxelraToken0 } from '../../smart contract/typechain-types'
+import { CrossDexRouter,CrossDexFactory,CrossDexPair,AxelraToken0,SecondaryChainAxelraDexMsg } from '../../smart contract/typechain-types'
 import {
   toEtherandFixFloatingPoint,
   toWei,
@@ -13,7 +14,7 @@ import {
   toFixUnits
 } from '../utils/UnitInEther'
 import { useNetwork } from 'wagmi'
-import { FindAddressTokenByChainID, FindRPCByChainID } from '../utils/findByChainId'
+import { CheckAvailableChainByChainID, FindAddressAxelraByChainID, FindAddressTokenByChainID, FindRPCByChainID } from '../utils/findByChainId'
 import { ContractAddressRouter,ContractAddressFactory, ChainIDAvalanchefuji } from '../utils/valueConst'
 
 interface IContract {
@@ -23,6 +24,7 @@ interface IContract {
   loadUserBalanceToken: (addressToken0: string, addressToken1: string) => Promise<void>
   reserve:{[x: string]: number;}
   userBalanceToken:{[x: string]: string;}
+  sendTxBridgeSwap: (amountIn: string, amountOutMin: string, addressTokenIN: string, addressTokenOut: string, destinationAddressReceiveToken: string, destinationChainReceiveToken: string) => Promise<string>
 }
 
 export const ContractContext = createContext<IContract>({
@@ -32,6 +34,7 @@ export const ContractContext = createContext<IContract>({
   loadUserBalanceToken: async () => {},
   reserve: {},
   userBalanceToken: {},
+  sendTxBridgeSwap: async () => "",
 })
 
 interface ChildrenProps {
@@ -156,8 +159,6 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
   const loadUserBalanceToken = async (addressToken0: string,addressToken1: string) => {
     try {
       if (!window.ethereum) return
-
-
       const contractToken0 = getAxelraTokenContract(addressToken0) 
       const contractToken1 = getAxelraTokenContract(addressToken1) 
       const accounts = (await window.ethereum.request({ method: 'eth_accounts', }))[0]
@@ -169,16 +170,54 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
         [addressToken0]: toEther(result0),
         [addressToken1]: toEther(result1),
       }
-      console.log('DTO',DTO)
       setUserBalanceToken(DTO)
     } catch (error) {
       console.log(error)
     }
   }
 
+  const sendTxBridgeSwap = async (  
+        amountIn: string,
+        amountOutMin:string,
+        addressTokenIN:string , 
+        addressTokenOut:string , 
+        destinationAddressReceiveToken:string,
+        destinationChainReceiveToken:string 
+        ) => {
+    try {
+      if (!window.ethereum) console.log('Please install metamask')
+      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error()
+      console.log('amountIn', amountIn)
+      console.log('amountOutMin', amountOutMin)
+      console.log('addressTokenIN', addressTokenIN)
+      console.log('addressTokenOut', addressTokenOut)
+      console.log('destinationAddressReceiveToken', destinationAddressReceiveToken)
+      console.log('destinationChainReceiveToken', destinationChainReceiveToken)
+      const signer = providerWindow.getSigner()
+      const contractSecondaryChainAxelra = new ethers.Contract(
+        FindAddressAxelraByChainID(chain?.id),
+        artifactSecondaryChainAxelraDexMsg.abi,
+        signer
+      ) as SecondaryChainAxelraDexMsg
+      const transactionHash = await contractSecondaryChainAxelra.bridgeSwap(
+        toWei(amountIn),
+        toWei(amountOutMin),
+        addressTokenIN,
+        addressTokenOut,
+        destinationAddressReceiveToken,
+        destinationChainReceiveToken
+      )
+      await transactionHash.wait()
+       loadUserBalanceToken(
+         FindAddressTokenByChainID(chain?.id, true),
+         FindAddressTokenByChainID(chain?.id, false)
+       )
+       return transactionHash.hash
+    } catch (error:any) {
+       throw new Error(error.reason)
+    }
+  }
 
-
-  
 
   const addlistenerEvents = async () => {
     try {
@@ -209,6 +248,7 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
         loadUserBalanceToken,
         reserve,
         userBalanceToken,
+        sendTxBridgeSwap,
       }}
     >
       {!initialLoading && children}

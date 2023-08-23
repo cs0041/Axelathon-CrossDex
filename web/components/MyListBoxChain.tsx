@@ -5,11 +5,23 @@ import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
  
 
 interface Props {
-  listItem: { chainName: string}[]
+  listItem: { chainName: string }[]
+  nowChainName: string
+  setDestinationChainName: React.Dispatch<React.SetStateAction<string>>
 }
 
-export default function MyListBoxChain({ listItem }: Props) {
-  const [textselected, setSelected] = useState(listItem[0])
+export default function MyListBoxChain({
+  listItem,
+  nowChainName,
+  setDestinationChainName,
+}: Props) {
+  const [textselected, setSelected] = useState(
+    listItem[
+      listItem.findIndex((item) => {
+        return item.chainName === nowChainName
+      })
+    ]
+  )
 
   return (
     <div className=" w-36 !text-sm">
@@ -52,6 +64,7 @@ export default function MyListBoxChain({ listItem }: Props) {
                             ? 'text-blue-600'
                             : ''
                         }`}
+                        onClick={()=>{setDestinationChainName(item.chainName)}}
                       >
                         <img src="logo.png" alt="logo" className="w-6 " />
                         <span>{item.chainName}</span>

@@ -1,6 +1,8 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/solid'
 import { Fragment, useState } from 'react'
+import { LightTooltip } from '../utils/muiStyled'
+import { QuestionMarkCircleIcon } from '@heroicons/react/24/outline'
 
 interface Props {
   onClose: () => void
@@ -79,11 +81,25 @@ export default function MySettingModal({
                       <XMarkIcon className="h-6 w-6" />
                     </button>
                   </Dialog.Title>
-                  <h1 className="mt-3 font-bold">Slippage Tolerance</h1>
+                  <div className="flex flex-row gap-1 items-center mt-3">
+                    <span className="font-bold">Slippage Tolerance</span>
+                    <LightTooltip
+                      title="Your transaction will revert if the price changes unfavorably by more than this percentage slippage.  
+                      Max Slippage 100%"
+                      arrow
+                      placement="bottom"
+                    >
+                      <QuestionMarkCircleIcon className=" IconHover h-5 w-5" />
+                    </LightTooltip>
+                  </div>
                   <div className="flex flex-row justify-center items-center gap-2  mt-3 ">
                     <button
                       className={`flex h-full rounded-md p-2 hover:bg-blue-600
-                    ${defaultSlippage == DefaultSlippage.one ? 'bg-blue-600' : 'bg-gray-700'}`}
+                    ${
+                      defaultSlippage == DefaultSlippage.one
+                        ? 'bg-blue-600'
+                        : 'bg-gray-700'
+                    }`}
                       onClick={() => {
                         setSlippage(0.1)
                         setDefaultSlippage(DefaultSlippage.one)
@@ -93,7 +109,11 @@ export default function MySettingModal({
                     </button>
                     <button
                       className={`flex h-full rounded-md p-2 hover:bg-blue-600
-                    ${defaultSlippage == DefaultSlippage.two ? 'bg-blue-600' : 'bg-gray-700'}`}
+                    ${
+                      defaultSlippage == DefaultSlippage.two
+                        ? 'bg-blue-600'
+                        : 'bg-gray-700'
+                    }`}
                       onClick={() => {
                         setSlippage(0.5)
                         setDefaultSlippage(DefaultSlippage.two)
@@ -103,7 +123,11 @@ export default function MySettingModal({
                     </button>
                     <button
                       className={`flex h-full rounded-md p-2 hover:bg-blue-600
-                    ${defaultSlippage == DefaultSlippage.three ? 'bg-blue-600' : 'bg-gray-700'}`}
+                    ${
+                      defaultSlippage == DefaultSlippage.three
+                        ? 'bg-blue-600'
+                        : 'bg-gray-700'
+                    }`}
                       onClick={() => {
                         setSlippage(1)
                         setDefaultSlippage(DefaultSlippage.three)
@@ -111,16 +135,12 @@ export default function MySettingModal({
                     >
                       1.0%
                     </button>
-                    
+
                     <div className="InputOrder px-4">
                       <div className="flex flex-row justify-center items-center gap-3">
                         <input
                           onKeyPress={(event) => {
                             if (!/^[0-9]*[.,]?[0-9]*$/.test(event.key)) {
-                              event.preventDefault()
-                            }
-                            if (slippage >= 1000) {
-                              setSlippage(1000)
                               event.preventDefault()
                             }
                             if (String(slippage).length >= 6) {
@@ -130,16 +150,22 @@ export default function MySettingModal({
                           value={slippage}
                           onChange={(e) => {
                             setSlippage(Number(e.target.value))
-                            if(Number(e.target.value) == DefaultSlippage.one){
-                                setDefaultSlippage(DefaultSlippage.one)
+                            if (Number(e.target.value) == DefaultSlippage.one) {
+                              setDefaultSlippage(DefaultSlippage.one)
+                            } else if (
+                              Number(e.target.value) == DefaultSlippage.two
+                            ) {
+                              setDefaultSlippage(DefaultSlippage.two)
+                            } else if (
+                              Number(e.target.value) == DefaultSlippage.three
+                            ) {
+                              setDefaultSlippage(DefaultSlippage.three)
+                            } else {
+                              setDefaultSlippage(undefined)
                             }
-                            else if(Number(e.target.value) == DefaultSlippage.two){
-                                setDefaultSlippage(DefaultSlippage.two)
-                            }
-                            else if(Number(e.target.value) == DefaultSlippage.three){
-                                setDefaultSlippage(DefaultSlippage.three)
-                            }else {
-                               setDefaultSlippage(undefined)
+
+                            if (Number(e.target.value) > 100) {
+                              setSlippage(100)
                             }
                           }}
                           className="    w-full py-2   bg-transparent outline-none  text-right"
@@ -151,7 +177,17 @@ export default function MySettingModal({
                       </div>
                     </div>
                   </div>
-                  <h1 className="mt-3 font-bold">Transaction deadline</h1>
+                  <div className="flex flex-row gap-1 items-center mt-3">
+                    <span className="font-bold">Transaction deadline</span>
+                    <LightTooltip
+                      title="Your transaction will revert if it is pending for more than this period of time.
+                      Max deadline 60 minutes"
+                      arrow
+                      placement="bottom"
+                    >
+                      <QuestionMarkCircleIcon className=" IconHover h-5 w-5" />
+                    </LightTooltip>
+                  </div>
                   <div className="InputOrder px-4 mt-3">
                     <div className="flex flex-row justify-center items-center gap-3">
                       <input
@@ -159,17 +195,16 @@ export default function MySettingModal({
                           if (!/^[0-9]*$/.test(event.key)) {
                             event.preventDefault()
                           }
-                          if (deadline >= 60) {
-                            setDeadline(60)
-                            event.preventDefault()
-                          }
-                          if (String(deadline).length >= 2) {
+                          if (String(deadline).length >= 5) {
                             event.preventDefault()
                           }
                         }}
                         value={deadline}
                         onChange={(e) => {
                           setDeadline(Number(e.target.value))
+                          if (Number(e.target.value) >= 60) {
+                            setDeadline(60)
+                          }
                         }}
                         className="   w-full py-2  text-right  bg-transparent outline-none  text-white"
                         placeholder="0"

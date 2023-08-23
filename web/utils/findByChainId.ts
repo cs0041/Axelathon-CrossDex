@@ -1,4 +1,4 @@
-import { ChainIDAvalanchefuji, ChainIDMumbai,ChainIDFantomTestnet, AllowListTradeToken } from './valueConst'
+import { ChainIDAvalanchefuji, ChainIDMumbai,ChainIDFantomTestnet, AllowListTradeToken, listAxelra } from './valueConst'
 
 export function FindRPCByChainID(chainID: number): string {
     let rpc = ""
@@ -49,4 +49,59 @@ export function FindAddressTokenByChainID(chainID: number | undefined,isToken0: 
   return addressToken
 }
 
- 
+export function FindAddressAxelraByChainID(chainID: number | undefined): string {
+    let addressAxekra = ""
+    switch (chainID) {
+      case ChainIDAvalanchefuji:
+        addressAxekra = listAxelra.Avalanche.contractAddress
+        break
+      case ChainIDMumbai:
+        addressAxekra = listAxelra.Avalanche.contractAddress
+        break
+      case ChainIDFantomTestnet:
+        addressAxekra = listAxelra.Fantom.contractAddress
+        break
+      default:
+        addressAxekra = listAxelra.Fantom.contractAddress
+        break
+    }
+   
+  return addressAxekra
+}
+
+ export function CheckAvailableChainByChainID(chainID: number | undefined): boolean {
+   switch (chainID) {
+     case ChainIDAvalanchefuji:
+       return true
+       break
+     case ChainIDMumbai:
+       return true
+       break
+     case ChainIDFantomTestnet:
+       return true
+       break
+     default:
+       return false
+       break
+   }
+ }
+
+ export function GetChainNameByChainId(chainID: number | undefined): string {
+     let chainName = ''
+     switch (chainID) {
+       case ChainIDAvalanchefuji:
+         chainName = 'Avalanche'
+         break
+       case ChainIDMumbai:
+        chainName = 'Polygon'
+         break
+       case ChainIDFantomTestnet:
+         chainName = 'Fantom'
+         break
+       default:
+         chainName = 'Avalanche'
+         break
+     }
+
+     return chainName
+ }
