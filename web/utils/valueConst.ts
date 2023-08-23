@@ -1,5 +1,5 @@
 export const Contract = '0x0000000000000000000000000000000000000001'
-export const ChainIDAvalanchefuji = 43114
+export const ChainIDAvalanchefuji = 43113
 export const ChainIDMumbai = 80001
 export const ChainIDFantomTestnet = 4002
 export const ContractAddressFactory = '0x9ed60E9C2b11243daF4F85981bc6eEC210C26561'

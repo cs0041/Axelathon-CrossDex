@@ -28,6 +28,7 @@ function swap({}: Props) {
     userBalanceToken,
     loadUserBalanceToken,
     sendTxBridgeSwap,
+    loadingUserBalanceToken,
   } = useContext(ContractContext)
 
   // wagmi
@@ -118,11 +119,14 @@ function swap({}: Props) {
             </div>
           </div>
           <div className="flex justify-end gap-2 text-sm text-gray-400">
-            <span>
-              {' '}
-              Balance:{' '}
-              {Number(userBalanceToken[addressToken0SecondaryChain]).toFixed(6)}
-            </span>
+            <div className="flex flex-row justify-center items-center gap-2">
+              <span>Balance</span>
+              {loadingUserBalanceToken ? (
+                <SVGLoader />
+              ) : (
+                Number(userBalanceToken[addressToken0SecondaryChain]).toFixed(6)
+              )}
+            </div>
             <span
               onClick={async () => {
                 setLoadingPrice(true)
@@ -201,11 +205,14 @@ function swap({}: Props) {
             </div>
           </div>
           <div className="flex justify-end gap-2 text-sm text-gray-400">
-            <span>
-              {' '}
-              Balance:{' '}
-              {Number(userBalanceToken[addressToken1SecondaryChain]).toFixed(6)}
-            </span>
+            <div className="flex flex-row justify-center items-center gap-2">
+              <span>Balance</span>
+              {loadingUserBalanceToken ? (
+                <SVGLoader />
+              ) : (
+                Number(userBalanceToken[addressToken1SecondaryChain]).toFixed(6)
+              )}
+            </div>
           </div>
         </div>
         <div className="flex flex-row bg-[#121A2A] rounded-b-[15px] mt-[1px] py-2  px-4 items-center gap-2">
@@ -235,16 +242,20 @@ function swap({}: Props) {
         </div>
         <button
           onClick={() => {
-            notificationToast(
-              sendTxBridgeSwap(
-                inputIn,
-                '0',
-                addressToken0SecondaryChain,
-                addressToken1SecondaryChain,
-                recipientAddress!,
-                destinationChainName
+            if (chain?.id == ChainIDAvalanchefuji){
+              console.log('swap')
+            }else{
+              notificationToast(
+                sendTxBridgeSwap(
+                  inputIn,
+                  (Number(inputOut) * ((100 - slippage) / 100)).toString(),
+                  addressToken0SecondaryChain,
+                  addressToken1SecondaryChain,
+                  recipientAddress!,
+                  destinationChainName
+                )
               )
-            )
+            }
           }}
           disabled={
             loadingPrice ||

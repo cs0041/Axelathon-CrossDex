@@ -24,6 +24,7 @@ interface IContract {
   loadUserBalanceToken: (addressToken0: string, addressToken1: string) => Promise<void>
   reserve:{[x: string]: number;}
   userBalanceToken:{[x: string]: string;}
+  loadingUserBalanceToken:boolean
   sendTxBridgeSwap: (amountIn: string, amountOutMin: string, addressTokenIN: string, addressTokenOut: string, destinationAddressReceiveToken: string, destinationChainReceiveToken: string) => Promise<string>
 }
 
@@ -34,6 +35,7 @@ export const ContractContext = createContext<IContract>({
   loadUserBalanceToken: async () => {},
   reserve: {},
   userBalanceToken: {},
+  loadingUserBalanceToken:false,
   sendTxBridgeSwap: async () => "",
 })
 
@@ -68,6 +70,7 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
   
   const [reserve, setReserve] = useState<{[x: string]: number}>({})
   const [userBalanceToken, setUserBalanceToken] = useState<{[x: string]: string}>({})
+  const [loadingUserBalanceToken, setLoadingUserBalanceToken] = useState<boolean>(false)
 
   
   const getAxelraTokenContract = (addressToken: string) => {
@@ -159,6 +162,7 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
   const loadUserBalanceToken = async (addressToken0: string,addressToken1: string) => {
     try {
       if (!window.ethereum) return
+      setLoadingUserBalanceToken(true)
       const contractToken0 = getAxelraTokenContract(addressToken0) 
       const contractToken1 = getAxelraTokenContract(addressToken1) 
       const accounts = (await window.ethereum.request({ method: 'eth_accounts', }))[0]
@@ -171,6 +175,7 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
         [addressToken1]: toEther(result1),
       }
       setUserBalanceToken(DTO)
+      setLoadingUserBalanceToken(false)
     } catch (error) {
       console.log(error)
     }
@@ -187,12 +192,12 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
     try {
       if (!window.ethereum) console.log('Please install metamask')
       if (!CheckAvailableChainByChainID(chain?.id)) throw new Error()
-      console.log('amountIn', amountIn)
-      console.log('amountOutMin', amountOutMin)
-      console.log('addressTokenIN', addressTokenIN)
-      console.log('addressTokenOut', addressTokenOut)
-      console.log('destinationAddressReceiveToken', destinationAddressReceiveToken)
-      console.log('destinationChainReceiveToken', destinationChainReceiveToken)
+      // console.log('amountIn', amountIn)
+      // console.log('amountOutMin', amountOutMin)
+      // console.log('addressTokenIN', addressTokenIN)
+      // console.log('addressTokenOut', addressTokenOut)
+      // console.log('destinationAddressReceiveToken', destinationAddressReceiveToken)
+      // console.log('destinationChainReceiveToken', destinationChainReceiveToken)
       const signer = providerWindow.getSigner()
       const contractSecondaryChainAxelra = new ethers.Contract(
         FindAddressAxelraByChainID(chain?.id),
@@ -205,7 +210,10 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
         addressTokenIN,
         addressTokenOut,
         destinationAddressReceiveToken,
-        destinationChainReceiveToken
+        destinationChainReceiveToken,
+        {
+          value: toWei('2'),
+        }
       )
       await transactionHash.wait()
        loadUserBalanceToken(
@@ -248,6 +256,7 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
         loadUserBalanceToken,
         reserve,
         userBalanceToken,
+        loadingUserBalanceToken,
         sendTxBridgeSwap,
       }}
     >

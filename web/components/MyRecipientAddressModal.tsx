@@ -1,6 +1,7 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/solid'
 import { Fragment, useState } from 'react'
+import { useAccount } from 'wagmi'
 
 interface Props {
   onClose: () => void
@@ -10,7 +11,13 @@ interface Props {
 
 export default function MyRecipientAddressModal({ onClose, recipientAddress,setRecipientAddress }: Props) {
   const [isOpen, setIsOpen] = useState(true)
-  const [tempRecipientAddress, setTempRecipientAddress] = useState<string|undefined>(recipientAddress)
+  const [tempRecipientAddress, setTempRecipientAddress] = useState<
+    string | undefined
+  >(recipientAddress)
+
+  // wagmi
+  const { address } = useAccount()
+ 
 
   function closeModal() {
     setIsOpen(false)
@@ -83,12 +90,18 @@ export default function MyRecipientAddressModal({ onClose, recipientAddress,setR
                       required
                     />
                   </div>
+                  <div
+                    className="text-blue-500 underline cursor-pointer hover:opacity-60 transition-all text-right text-sm mt-1"
+                    onClick={() => setTempRecipientAddress(address)}
+                  >
+                    Restore user address
+                  </div>
                   <button
-                    onClick={()=>{
+                    onClick={() => {
                       setRecipientAddress(tempRecipientAddress)
                       closeModal()
                     }}
-                    className="mt-5 flex w-full py-3 rounded-md bg-blue-700 items-center justify-center 
+                    className="mt-3 flex w-full py-3 rounded-md bg-blue-700 items-center justify-center 
                         hover:bg-blue-600 transition-all "
                   >
                     <h1 className="text-xl font-bold">
