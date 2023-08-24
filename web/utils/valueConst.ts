@@ -36,12 +36,13 @@ export const listAxelra = {
   },
 }
 
-export const listBoxPairLPMainChain = [
-  {
-    symbol: 'ETH-USDT',
+export const listPairLPMainChain = {
+  "USDT-USDC":{
+    symbol: 'USDT-USDC',
     contractAddress: '0x3EDf0629A6B58E4cDf9243338d5ea99612D5C454',
-  },
-]
+  }
+}
+ 
 export const listBoxChainName = [
   { chainName: 'Avalanche' },
   { chainName: 'Fantom' },

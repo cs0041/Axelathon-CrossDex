@@ -23,10 +23,8 @@ function swap({}: Props) {
   const {
     getAmountsOut,
     getAmountsIn,
-    loadReservePairMainChain,
     reserve,
     userBalanceToken,
-    loadUserBalanceToken,
     sendTxBridgeSwap,
     loadingUserBalanceToken,
   } = useContext(ContractContext)
@@ -242,9 +240,9 @@ function swap({}: Props) {
         </div>
         <button
           onClick={() => {
-            if (chain?.id == ChainIDAvalanchefuji){
+            if (chain?.id == ChainIDAvalanchefuji) {
               console.log('swap')
-            }else{
+            } else {
               notificationToast(
                 sendTxBridgeSwap(
                   inputIn,
@@ -259,7 +257,7 @@ function swap({}: Props) {
           }}
           disabled={
             loadingPrice ||
-            reserve[addressToken1MainChain] < Number(inputOut) ||
+            Number(reserve[addressToken1MainChain]) < Number(inputOut) ||
             Number(userBalanceToken[addressToken0SecondaryChain]) <
               Number(inputIn)
           }
@@ -268,7 +266,7 @@ function swap({}: Props) {
          ${
            loadingPrice
              ? 'bg-gray-600 cursor-not-allowed'
-             : reserve[addressToken1MainChain] < Number(inputOut)
+             : Number(reserve[addressToken1MainChain]) < Number(inputOut)
              ? 'bg-gray-600 cursor-not-allowed'
              : Number(userBalanceToken[addressToken0SecondaryChain]) <
                Number(inputIn)
@@ -278,7 +276,7 @@ function swap({}: Props) {
          `}
         >
           <h1 className="text-xl font-bold">
-            {reserve[addressToken1MainChain] < Number(inputOut)
+            {Number(reserve[addressToken1MainChain]) < Number(inputOut)
               ? 'Insufficient liquidity balance'
               : Number(userBalanceToken[addressToken0SecondaryChain]) <
                 Number(inputIn)
@@ -307,11 +305,11 @@ function swap({}: Props) {
             ) : (
               <p>
                 {(
-                  (reserve[addressToken1MainChain] /
-                    reserve[addressToken0MainChain] -
+                  (Number(reserve[addressToken1MainChain]) /
+                    Number(reserve[addressToken0MainChain]) -
                     Number(inputOut) / Number(inputIn)) /
-                  (reserve[addressToken1MainChain] /
-                    reserve[addressToken0MainChain] /
+                  (Number(reserve[addressToken1MainChain]) /
+                    Number(reserve[addressToken0MainChain]) /
                     100)
                 ).toFixed(2)}
                 %

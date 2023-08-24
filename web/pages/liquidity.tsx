@@ -1,16 +1,19 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import MyListBoxChain from '../components/MyListBoxChain'
 import { PlusCircleIcon,InboxStackIcon, InboxIcon} from '@heroicons/react/24/solid'
 import { ChevronUpIcon} from '@heroicons/react/24/outline'
-import { QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
+import { InformationCircleIcon, QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
 import { Disclosure } from '@headlessui/react'
 import SVGLoader from '../components/SVGLoader'
 import { useAccount, useNetwork } from 'wagmi'
 import MyRecipientAddressModal from '../components/MyRecipientAddressModal'
 import { Switch } from '@headlessui/react'
 import { LightTooltip } from '../utils/muiStyled'
-import { listBoxChainName, listBoxPairLPMainChain } from '../utils/valueConst'
-import { GetChainNameByChainId } from '../utils/findByChainId'
+import { ChainIDAvalanchefuji, ChainNameMainChainDex, listBoxChainName, listPairLPMainChain } from '../utils/valueConst'
+import { FindAddressTokenByChainID, GetChainNameByChainId } from '../utils/findByChainId'
+import { ContractContext } from '../context/contractContext'
+import { notificationToast } from '../utils/notificationToastify'
+import { shortenAddress } from '../utils/shortenAddress'
 
 type Props = {}
 
@@ -21,19 +24,68 @@ enum TabBar {
 }
 
 function liquidity({}: Props) {
-  // wagmi
+  const {
+    
+    reserve,
+    userBalanceToken,
+    userBalancePairLP,
+    getQuoteForAddLiquidity,
+    loadingUserBalanceToken,
+  } = useContext(ContractContext)
 
+
+  // wagmi
   const { chain } = useNetwork()
   const { address } = useAccount()
-  
+
+  // Tab Bar
   const [statusTabBar, setStatusTabBar] = useState<TabBar>(TabBar.Pos)
+
+  // Modal
   const [showModalEditAddress, setShowModalEditAddress] = useState(false)
+  
+  // Switch
   const [enabled, setEnabled] = useState(false)
+
+  // loading
+  const [loadingPrice, setLoadingPrice] = useState(false)
+  const [loadingIn, setLoadingIn] = useState(false)
+  const [loadingOut, setLoadingOut] = useState(false)
+  const [loadingRemove, setLoadingRemove] = useState(false)
+
+  // modal setting Recipient Address
+  const [recipientAddress, setRecipientAddress] = useState<string | undefined>(
+    address
+  )
 
   // Destination  chain name
   const [destinationChainName, setDestinationChainName] = useState<string>(
     GetChainNameByChainId(chain?.id)
   )
+
+  //data input Add LP
+  const [inputIn, setInputIn] = useState<string>('')
+  const [inputOut, setInputOut] = useState<string>('')
+
+  //data input Remove LP
+  const [inputRemove, setInputRemove] = useState<string>('')
+
+  // list trade token
+  const [addressToken0MainChain, setAddressToken0MainChain] = useState<string>(
+    FindAddressTokenByChainID(ChainIDAvalanchefuji, true)
+  )
+  const [addressToken1MainChain, setAddressToken1MainChain] = useState<string>(
+    FindAddressTokenByChainID(ChainIDAvalanchefuji, false)
+  )
+  const [addressToken0SecondaryChain, setAddressToken0SecondaryChain] =
+    useState<string>(FindAddressTokenByChainID(chain?.id, true))
+  const [addressToken1SecondaryChain, setAddressToken1SecondaryChain] =
+    useState<string>(FindAddressTokenByChainID(chain?.id, false))
+
+  const [symbolToken0, setSymbolToken0] = useState<string>('USDT')
+  const [symbolToken1, setSymbolToken1] = useState<string>('USDC')
+
+
   return (
     <div className="flex mt-14 justify-center items-center">
       <div className="relative bg-[#0D111C] px-2 py-3 rounded-3xl border-[1px] border-[#fafafa4d]  w-[450px]">
@@ -100,11 +152,11 @@ function liquidity({}: Props) {
                       >
                         <div className="flex flex-row gap-2 bg-gray-700 py-2 px-3 rounded-lg">
                           <img src="logo.png" alt="logo" className="w-6 " />
-                          <span>AXL - USDT</span>
+                          <span>USDT - USDC</span>
                         </div>
 
                         <div className="flex flex-row gap-2 items-center justify-center">
-                          <span>12.04</span>
+                          <span>{userBalancePairLP}</span>
                           <ChevronUpIcon
                             className={`${
                               open ? 'rotate-180 transform' : ''
@@ -156,9 +208,13 @@ function liquidity({}: Props) {
         )}
         {statusTabBar == TabBar.Add && (
           <>
-            <div className="InputOrder gap-1 pt-2 pb-3 px-4">
-              <span className="text-gray-500">Token 1</span>
-              <div className="flex flex-row gap-2">
+            <div
+              className={`InputOrder  gap-1 pt-2 pb-3 px-4
+        ${loadingIn && 'opacity-50'}
+        `}
+            >
+              <span className="text-gray-500">Token 0</span>
+              <div className="flex flex-row gap-3">
                 <input
                   className="text-3xl  w-full   text-left  bg-transparent outline-none  text-white"
                   placeholder="0"
@@ -168,30 +224,69 @@ function liquidity({}: Props) {
                       event.preventDefault()
                     }
                   }}
+                  value={inputIn}
+                  onChange={async (e) => {
+                    setLoadingPrice(true)
+                    setLoadingOut(true)
+                    setInputIn(e.target.value)
+                    const amountToken1AddLiquidity =
+                      await getQuoteForAddLiquidity(
+                        e.target.value,
+                        reserve[addressToken0MainChain],
+                        reserve[addressToken1MainChain]
+                      )
+                    setInputOut(amountToken1AddLiquidity)
+                    setLoadingPrice(false)
+                    setLoadingOut(false)
+                  }}
                 />
-                <div className="bg-[#293249]   flex flex-row justify-center items-center px-3 py-0   gap-1 rounded-lg text-sm">
+                <div className="bg-[#293249]   flex flex-row justify-center items-center px-4 py-0   gap-1 rounded-lg text-sm">
                   <img src="logo.png" alt="logo" className="w-6 h-6" />
-                  <span>USDT</span>
+                  <span>{symbolToken0}</span>
                 </div>
               </div>
               <div className="flex justify-end gap-2 text-sm text-gray-400">
-                <span> Balance: 123123</span>
+                <div className="flex flex-row justify-center items-center gap-2">
+                  <span>Balance</span>
+                  {loadingUserBalanceToken ? (
+                    <SVGLoader />
+                  ) : (
+                    Number(
+                      userBalanceToken[addressToken0SecondaryChain]
+                    ).toFixed(6)
+                  )}
+                </div>
                 <span
-                  onClick={() => {}}
+                  onClick={async () => {
+                    setLoadingPrice(true)
+                    setLoadingOut(true)
+                    setInputIn(userBalanceToken[addressToken0SecondaryChain])
+                    const amountToken1AddLiquidity =
+                      await getQuoteForAddLiquidity(
+                        userBalanceToken[addressToken0SecondaryChain],
+                        reserve[addressToken0MainChain],
+                        reserve[addressToken1MainChain]
+                      )
+                    setInputOut(amountToken1AddLiquidity)
+                    setLoadingPrice(false)
+                    setLoadingOut(false)
+                  }}
                   className="text-blue-500 cursor-pointer hover:text-blue-700 transition-all"
                 >
                   Max
                 </span>
               </div>
             </div>
-
             <div className="flex justify-center items-center mt-3 mb-3">
-              <PlusCircleIcon className="h-8 w-8 text-white " />
+              <PlusCircleIcon className="h-8 w-8 text-white  " />
             </div>
-
-            <div className="InputOrder rounded-b-none gap-1 pt-2 pb-3 px-4">
-              <span className="text-gray-500">Token 2</span>
-              <div className="flex flex-row gap-2 ">
+            <div
+              className={`InputOrder rounded-b-none gap-1 pt-2 pb-3 px-4
+        ${loadingOut && 'opacity-50'}
+        `}
+            >
+              <span className="text-gray-500">Token 1</span>
+              <div className="flex flex-row gap-3 ">
                 <input
                   className="text-3xl  w-full   text-left  bg-transparent outline-none  text-white"
                   placeholder="0"
@@ -201,31 +296,111 @@ function liquidity({}: Props) {
                       event.preventDefault()
                     }
                   }}
+                  value={inputOut}
+                  onChange={async (e) => {
+                    setLoadingPrice(true)
+                    setLoadingIn(true)
+                    setInputOut(e.target.value)
+                    const amountToken0AddLiquidity =
+                      await getQuoteForAddLiquidity(
+                        e.target.value,
+                        reserve[addressToken1MainChain],
+                        reserve[addressToken0MainChain]
+                      )
+                    setInputIn(amountToken0AddLiquidity)
+                    setLoadingPrice(false)
+                    setLoadingIn(false)
+                  }}
                 />
-                <div className="bg-[#293249]   flex flex-row justify-center items-center px-3 py-0   gap-1 rounded-lg text-sm">
+                <div className="bg-[#293249]   flex flex-row justify-center items-center px-4 py-0   gap-1 rounded-lg text-sm">
                   <img src="logo.png" alt="logo" className="w-6 h-6" />
-                  <span>USDC</span>
+                  <span>{symbolToken1}</span>
                 </div>
               </div>
               <div className="flex justify-end gap-2 text-sm text-gray-400">
-                <span> Balance: 123123</span>
+                <div className="flex flex-row justify-center items-center gap-2">
+                  <span>Balance</span>
+                  {loadingUserBalanceToken ? (
+                    <SVGLoader />
+                  ) : (
+                    Number(
+                      userBalanceToken[addressToken1SecondaryChain]
+                    ).toFixed(6)
+                  )}
+                </div>
               </div>
             </div>
             <div className="flex flex-row bg-[#121A2A] rounded-b-[15px] mt-[1px] py-2  px-4 items-center gap-2">
-              {true ? (
+              {loadingPrice ? (
                 <>
                   <SVGLoader />
                   <p className="text-white text-xs">Fetching price...</p>
                 </>
               ) : (
-                <></>
+                <>
+                  {inputIn == '' || inputOut == '' ? (
+                    <span className="text-red-600 text-xs">
+                      Please input amount
+                    </span>
+                  ) : (
+                    <div className="flex flex-row gap-1">
+                      <InformationCircleIcon className="h-4 w-4 text-white  " />
+                      <span className="text-xs">
+                        1 {symbolToken0} ={' '}
+                        {(Number(inputOut) / Number(inputIn)).toFixed(6)}{' '}
+                        {symbolToken1}
+                      </span>
+                    </div>
+                  )}
+                </>
               )}
             </div>
             <button
-              className="mt-2 flex w-full py-3 rounded-2xl bg-blue-700 items-center justify-center 
-         hover:bg-blue-600 transition-all "
+              onClick={() => {
+                if (chain?.id == ChainIDAvalanchefuji) {
+                  console.log('add lp')
+                } else {
+                  // notificationToast(
+                  //   sendTxBridgeSwap(
+                  //     inputIn,
+                  //     (Number(inputOut) * ((100 - slippage) / 100)).toString(),
+                  //     addressToken0SecondaryChain,
+                  //     addressToken1SecondaryChain,
+                  //     recipientAddress!,
+                  //     destinationChainName
+                  //   )
+                  // )
+                }
+              }}
+              disabled={
+                loadingPrice ||
+                Number(userBalanceToken[addressToken0SecondaryChain]) <
+                  Number(inputIn) ||
+                Number(userBalanceToken[addressToken1SecondaryChain]) <
+                  Number(inputOut)
+              }
+              className={`mt-2 flex w-full py-3 rounded-2xl  items-center justify-center 
+          transition-all 
+         ${
+           loadingPrice
+             ? 'bg-gray-600 cursor-not-allowed'
+             : Number(userBalanceToken[addressToken0SecondaryChain]) <
+                 Number(inputIn) ||
+               Number(userBalanceToken[addressToken1SecondaryChain]) <
+                 Number(inputOut)
+             ? 'bg-gray-600 cursor-not-allowed'
+             : 'bg-blue-700 hover:bg-blue-600'
+         }
+         `}
             >
-              <h1 className="text-xl font-bold">Add Liquidity</h1>
+              <h1 className="text-xl font-bold">
+                {Number(userBalanceToken[addressToken0SecondaryChain]) <
+                  Number(inputIn) ||
+                Number(userBalanceToken[addressToken1SecondaryChain]) <
+                  Number(inputOut)
+                  ? 'Insufficient user balance'
+                  : 'Add Liquidity'}
+              </h1>
             </button>
 
             <div
@@ -241,62 +416,65 @@ function liquidity({}: Props) {
                 <p>0.1%</p>
               </div>
             </div>
-            <div
-              className="bg-[#121A2A] flex flex-col mt-2 rounded-lg py-2 px-4 justify-center items-start 
-           text-gray-300  text-xs gap-2 "
-            >
-              <div className="flex flex-row w-full items-center justify-between">
-                <div className="flex flex-row gap-1">
-                  <span>Enable force add liquidity</span>
-                  <LightTooltip
-                    title="Enable this mode  will helps to force add liquidity, will choose token 1 as the main add liquidity first if can't add liquidity
+            {/* 545454181 */}
+            {GetChainNameByChainId(chain?.id) != ChainNameMainChainDex && (
+              <div
+                className="bg-[#121A2A] flex flex-col mt-2 rounded-lg py-2 px-4 justify-center items-start 
+           text-gray-300  text-xs gap-1"
+              >
+                <div className="flex flex-row w-full items-center justify-between">
+                  <div className="flex flex-row gap-1">
+                    <span>Enable force add liquidity</span>
+                    <LightTooltip
+                      title="Enable this mode  will helps to force add liquidity, will choose token 1 as the main add liquidity first if can't add liquidity
                     , then try using token2.It will reduce the transaction failed problem when the price fluctuates"
-                    arrow
-                    placement="bottom"
+                      arrow
+                      placement="bottom"
+                    >
+                      <QuestionMarkCircleIcon className=" IconHover h-4 w-4 " />
+                    </LightTooltip>
+                  </div>
+                  <Switch
+                    checked={enabled}
+                    onChange={setEnabled}
+                    className={`${enabled ? 'bg-blue-500 ' : 'bg-gray-700 '}
+              border-2  border-transparent relative inline-flex h-[20px] w-[40px] shrink-0 cursor-pointer 
+              rounded-full  transition-colors duration-200 ease-in-out focus:outline-none`}
                   >
-                    <QuestionMarkCircleIcon className=" IconHover h-4 w-4 " />
-                  </LightTooltip>
-                </div>
-                <Switch
-                  checked={enabled}
-                  onChange={setEnabled}
-                  className={`${enabled ? 'bg-blue-500 ' : 'bg-gray-700 '}
-            border-2  border-transparent relative inline-flex h-[20px] w-[40px] shrink-0 cursor-pointer 
-            rounded-full  transition-colors duration-200 ease-in-out focus:outline-none`}
-                >
-                  <span className="sr-only">setting</span>
-                  <span
-                    aria-hidden="true"
-                    className={`${
-                      enabled
-                        ? 'translate-x-5 bg-white '
-                        : 'translate-x-0 bg-white'
-                    }
+                    <span className="sr-only">setting</span>
+                    <span
+                      aria-hidden="true"
+                      className={`${
+                        enabled
+                          ? 'translate-x-5 bg-white '
+                          : 'translate-x-0 bg-white'
+                      }
               pointer-events-none inline-block h-[16px] w-[16px] transform rounded-full  shadow-lg ring-0 transition duration-200 ease-in-out`}
+                    />
+                  </Switch>
+                </div>
+                <div className="flex flex-row w-full items-center justify-between ">
+                  <div>Recipient Address</div>
+                  <div className="flex gap-1">
+                    <span> {shortenAddress(recipientAddress)} </span>
+                    <span
+                      className="text-blue-500 underline cursor-pointer hover:opacity-60 transition-all"
+                      onClick={() => setShowModalEditAddress(true)}
+                    >
+                      Edit
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-row w-full items-center justify-between">
+                  <div>Destination Chain ReceiveToken</div>
+                  <MyListBoxChain
+                    listItem={listBoxChainName}
+                    nowChainName={destinationChainName}
+                    setDestinationChainName={setDestinationChainName}
                   />
-                </Switch>
-              </div>
-              <div className="flex flex-row w-full items-center justify-between ">
-                <div>Recipient Address</div>
-                <div className="flex gap-1">
-                  <span> 0x313..4124</span>
-                  <span
-                    className="text-blue-500 underline cursor-pointer hover:opacity-60 transition-all"
-                    onClick={() => setShowModalEditAddress(true)}
-                  >
-                    Edit
-                  </span>
                 </div>
               </div>
-              <div className="flex flex-row w-full items-center justify-between">
-                <div>Destination Chain ReceiveToken</div>
-                <MyListBoxChain
-                  listItem={listBoxChainName}
-                  nowChainName={destinationChainName}
-                  setDestinationChainName={setDestinationChainName}
-                />
-              </div>
-            </div>
+            )}
           </>
         )}
         {statusTabBar == TabBar.Remove && (
@@ -313,38 +491,61 @@ function liquidity({}: Props) {
                       event.preventDefault()
                     }
                   }}
+                  value={inputRemove}
+                  onChange={async (e) => {
+                    setLoadingRemove(true)
+                    setInputRemove(e.target.value)
+                    // find some thing
+                    setLoadingRemove(false)
+                  }}
                 />
                 <div className="bg-[#293249]   flex flex-row justify-center w-6/12 items-center px-3 py-0   gap-1 rounded-lg text-sm">
                   <img src="logo.png" alt="logo" className="w-6 h-6" />
-                  <span>USDT-USDC</span>
+                  <span>{listPairLPMainChain['USDT-USDC'].symbol}</span>
                 </div>
               </div>
               <div className="flex justify-end gap-2 text-sm text-gray-400">
-                <span> Balance: 123123</span>
+                <span> Balance: {userBalancePairLP}</span>
                 <span
-                  onClick={() => {}}
+                  onClick={() => {
+                    setLoadingRemove(true)
+                    setInputRemove(userBalancePairLP)
+                    // find some thing
+                    setLoadingRemove(false)
+                  }}
                   className="text-blue-500 cursor-pointer hover:text-blue-700 transition-all"
                 >
                   Max
                 </span>
               </div>
             </div>
-            <div className="flex flex-row bg-[#121A2A] rounded-b-[15px] mt-[1px] py-2  px-4 items-center gap-2">
-              {true ? (
-                <>
-                  <SVGLoader />
-                  <p className="text-white text-xs">Fetching price...</p>
-                </>
-              ) : (
-                <></>
-              )}
-            </div>
 
             <button
-              className="mt-2 flex w-full py-3 rounded-2xl bg-blue-700 items-center justify-center 
-         hover:bg-blue-600 transition-all "
+              onClick={() => {
+                if (chain?.id == ChainIDAvalanchefuji) {
+                  console.log('remove lp')
+                } else {
+                }
+              }}
+              disabled={
+                loadingPrice || Number(userBalancePairLP) < Number(inputRemove)
+              }
+              className={`mt-2 flex w-full py-3 rounded-2xl  items-center justify-center 
+          transition-all 
+         ${
+           loadingPrice
+             ? 'bg-gray-600 cursor-not-allowed'
+             : Number(userBalancePairLP) < Number(inputRemove)
+             ? 'bg-gray-600 cursor-not-allowed'
+             : 'bg-blue-700 hover:bg-blue-600'
+         }
+         `}
             >
-              <h1 className="text-xl font-bold">Remove Liquidity</h1>
+              <h1 className="text-xl font-bold">
+                {Number(userBalancePairLP) < Number(inputRemove)
+                  ? 'Insufficient user balance'
+                  : 'Add Liquidity'}
+              </h1>
             </button>
 
             <div
@@ -371,7 +572,7 @@ function liquidity({}: Props) {
               <div className="flex flex-row w-full items-center justify-between ">
                 <div>Recipient Address</div>
                 <div className="flex gap-1">
-                  <span> 0x313..4124</span>
+                  <span> {shortenAddress(recipientAddress)} </span>
                   <span
                     className="text-blue-500 underline cursor-pointer hover:opacity-60 transition-all"
                     onClick={() => setShowModalEditAddress(true)}
@@ -395,9 +596,9 @@ function liquidity({}: Props) {
 
       {showModalEditAddress && (
         <MyRecipientAddressModal
-          recipientAddress={address}
+          recipientAddress={recipientAddress}
+          setRecipientAddress={setRecipientAddress}
           onClose={() => setShowModalEditAddress(false)}
-          setRecipientAddress={() => {}}
         />
       )}
     </div>
