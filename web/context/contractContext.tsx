@@ -15,21 +15,44 @@ import {
 } from '../utils/UnitInEther'
 import { useNetwork } from 'wagmi'
 import { CheckAvailableChainByChainID, FindAddressAxelraByChainID, FindAddressTokenByChainID, FindRPCByChainID } from '../utils/findByChainId'
-import { ContractAddressRouter,ContractAddressFactory, ChainIDAvalanchefuji ,listPairLPMainChain} from '../utils/valueConst'
+import { ContractAddressRouter,ContractAddressFactory, ChainIDAvalanchefuji ,listPairLPMainChain, ChainIDMainChainDex} from '../utils/valueConst'
 
 interface IContract {
-  getAmountsOut: (amountIn: string, addressTokenIn: string, addressTokenOut: string) =>Promise<string>
-  getAmountsIn: (amountOut: string, addressTokenIn: string, addressTokenOut: string) =>Promise<string>
-  loadReservePairMainChain: (addressToken0: string, addressToken1: string) => Promise<void>
-  loadUserBalanceToken: (addressToken0: string, addressToken1: string) => Promise<void>
-  getQuoteForAddLiquidity: (amount0: string, reserve0: string, reserve1: string) => Promise<string>
-  reserve:{[x: string]: string;}
-  userBalanceToken:{[x: string]: string;}
-  loadingUserBalanceToken:boolean
+  getAmountsOut: (
+    amountIn: string,
+    addressTokenIn: string,
+    addressTokenOut: string
+  ) => Promise<string>
+  getAmountsIn: (
+    amountOut: string,
+    addressTokenIn: string,
+    addressTokenOut: string
+  ) => Promise<string>
+  loadReservePairMainChain: (
+    addressToken0: string,
+    addressToken1: string
+  ) => Promise<void>
+  loadUserBalanceToken: (
+    addressToken0: string,
+    addressToken1: string
+  ) => Promise<void>
+  getQuoteForAddLiquidity: (
+    amount0: string,
+    reserve0: string,
+    reserve1: string
+  ) => Promise<string>
+  reserve: { [x: string]: string }
+  userBalanceToken: { [x: string]: string }
+  loadingUserBalanceToken: boolean
   userBalancePairLP: string
-  loadingBalancePairLP:boolean
-  totalSupplyPairLP:string
-  sendTxBridgeSwap: (amountIn: string, amountOutMin: string, addressTokenIN: string, addressTokenOut: string, destinationAddressReceiveToken: string, destinationChainReceiveToken: string) => Promise<string>
+  loadingBalancePairLP: boolean
+  totalSupplyPairLP: string
+  sendTxBridgeSwap: ( amountIn: string, amountOutMin: string, addressTokenIN: string, addressTokenOut: string, destinationAddressReceiveToken: string, destinationChainReceiveToken: string) => Promise<string>
+  sendTxBridgeRemoveLiquidity: (   amountliquidity: string,   addressToken0: string,   addressToken1: string,   destinationAddressReceiveToken: string,   destinationChainReceiveToken: string) => Promise<string>
+  sendTxBridgeAddLiquidity: (   amount0: string,   amount1: string,   addressToken0: string,   addressToken1: string,   isForceAdd: boolean,   destinationAddressReceiveToken: string,   destinationChainReceiveToken: string) => Promise<string>
+  sendTxSwapExactTokensForTokens: (   amountIn: string,   amountOutMin: string,   addressTokenIN: string,   addressTokenOut: string,   to: string,   deadline: number) => Promise<string>
+  sendTxRemoveLiquidity: (  liquidity: string,  amount1: string,  addressToken0: string,  addressToken1: string,  to: string,  deadline: number) => Promise<string>
+  sendTxAddLiquidity: (  amount0: string,  amount1: string,  addressToken0: string,  addressToken1: string,  isForceAdd: boolean,  to: string,  deadline: number) => Promise<string>
 }
 
 export const ContractContext = createContext<IContract>({
@@ -42,9 +65,14 @@ export const ContractContext = createContext<IContract>({
   userBalanceToken: {},
   loadingUserBalanceToken: false,
   userBalancePairLP: '0',
-  loadingBalancePairLP:false,
-  totalSupplyPairLP:'0',
+  loadingBalancePairLP: false,
+  totalSupplyPairLP: '0',
   sendTxBridgeSwap: async () => '',
+  sendTxBridgeRemoveLiquidity: async () => '',
+  sendTxBridgeAddLiquidity: async () => '',
+  sendTxSwapExactTokensForTokens: async () => '',
+  sendTxRemoveLiquidity: async () => '',
+  sendTxAddLiquidity: async () => '',
 })
 
 interface ChildrenProps {
@@ -55,17 +83,19 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
   const { chain } = useNetwork()
   let providerWindow: ethers.providers.Web3Provider
   let providerRPCAvalanchefuji: ethers.providers.JsonRpcProvider
-  providerRPCAvalanchefuji = new ethers.providers.JsonRpcProvider(FindRPCByChainID(43114))
+  providerRPCAvalanchefuji = new ethers.providers.JsonRpcProvider(
+    FindRPCByChainID(43114)
+  )
 
   const contractCrossDexRouter = new ethers.Contract(
-      ContractAddressRouter,
-      artifactCrossDexRouter.abi,
-      providerRPCAvalanchefuji
+    ContractAddressRouter,
+    artifactCrossDexRouter.abi,
+    providerRPCAvalanchefuji
   ) as CrossDexRouter
   const contractCrossDexFactory = new ethers.Contract(
-      ContractAddressFactory,
-      artifactCrossDexFactory.abi,
-      providerRPCAvalanchefuji
+    ContractAddressFactory,
+    artifactCrossDexFactory.abi,
+    providerRPCAvalanchefuji
   ) as CrossDexFactory
 
   if (typeof window !== 'undefined') {
@@ -73,21 +103,24 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
       providerWindow = new ethers.providers.Web3Provider(window.ethereum as any)
     } catch (error) {}
   }
-  
+
   const [initialLoading, setInitialLoading] = useState(true)
-  
+
   const [reserve, setReserve] = useState<{ [x: string]: string }>({})
 
   // balance token
-  const [userBalanceToken, setUserBalanceToken] = useState<{[x: string]: string}>({})
-  const [loadingUserBalanceToken, setLoadingUserBalanceToken] = useState<boolean>(false)
+  const [userBalanceToken, setUserBalanceToken] = useState<{
+    [x: string]: string
+  }>({})
+  const [loadingUserBalanceToken, setLoadingUserBalanceToken] =
+    useState<boolean>(false)
 
   // balance PairLP
   const [userBalancePairLP, setUserBalancePairLP] = useState<string>('')
-  const [loadingBalancePairLP, setloadingBalancePairLP] = useState<boolean>(false)
-  const [totalSupplyPairLP,setTotalSupplyPairLP] = useState<string>('')
+  const [loadingBalancePairLP, setloadingBalancePairLP] =
+    useState<boolean>(false)
+  const [totalSupplyPairLP, setTotalSupplyPairLP] = useState<string>('')
 
-  
   const getAxelraTokenContract = (addressToken: string) => {
     const contract = new ethers.Contract(
       addressToken,
@@ -98,12 +131,11 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
     return contract
   }
 
-
   useEffect(() => {
     if (!window.ethereum) return alert('Please install metamask')
-    const loadInint = async() => {
+    const loadInint = async () => {
       addlistenerEvents()
-      if (chain){
+      if (chain) {
         loadUserBalanceToken(
           FindAddressTokenByChainID(chain.id, true),
           FindAddressTokenByChainID(chain.id, false)
@@ -111,7 +143,7 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
         loadReservePairMainChain(
           FindAddressTokenByChainID(ChainIDAvalanchefuji, true),
           FindAddressTokenByChainID(ChainIDAvalanchefuji, false)
-          )
+        )
         loadPairLPToken(listPairLPMainChain['USDT-USDC'].contractAddress)
       }
     }
@@ -119,22 +151,30 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
     setInitialLoading(false)
   }, [])
 
-  const getAmountsOut = async (amountIn: string,addressTokenIn: string,addressTokenOut: string) => {
+  const getAmountsOut = async (
+    amountIn: string,
+    addressTokenIn: string,
+    addressTokenOut: string
+  ) => {
     try {
       if (!window.ethereum) return ''
       const result = await contractCrossDexRouter.getAmountsOut(
         toWei(amountIn),
         addressTokenIn,
-        addressTokenOut,
+        addressTokenOut
       )
-      return toEtherFloatingPoint(result,8)
+      return toEtherFloatingPoint(result, 8)
     } catch (error) {
       console.log(error)
-      return "0"
+      return '0'
     }
   }
 
-  const getAmountsIn = async (amountOut: string,addressTokenIn: string,addressTokenOut: string) => {
+  const getAmountsIn = async (
+    amountOut: string,
+    addressTokenIn: string,
+    addressTokenOut: string
+  ) => {
     try {
       if (!window.ethereum) return ''
       const result = await contractCrossDexRouter.getAmountsIn(
@@ -142,13 +182,13 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
         addressTokenIn,
         addressTokenOut
       )
-      return toEtherFloatingPoint(result,8)
+      return toEtherFloatingPoint(result, 8)
     } catch (error) {
       console.log(error)
-      return "0"
+      return '0'
     }
   }
-  
+
   const getQuoteForAddLiquidity = async (
     amount0: string,
     reserve0: string,
@@ -168,12 +208,15 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
     }
   }
 
-  const loadReservePairMainChain = async (addressToken0: string,addressToken1: string) => {
+  const loadReservePairMainChain = async (
+    addressToken0: string,
+    addressToken1: string
+  ) => {
     try {
       if (!window.ethereum) return
       const pairLP = await contractCrossDexFactory.getPair(
         addressToken0,
-        addressToken1,
+        addressToken1
       )
       const contractCrossDexPair = new ethers.Contract(
         pairLP,
@@ -194,13 +237,18 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
       console.log(error)
     }
   }
-  const loadUserBalanceToken = async (addressToken0: string,addressToken1: string) => {
+  const loadUserBalanceToken = async (
+    addressToken0: string,
+    addressToken1: string
+  ) => {
     try {
       if (!window.ethereum) return
       setLoadingUserBalanceToken(true)
-      const contractToken0 = getAxelraTokenContract(addressToken0) 
-      const contractToken1 = getAxelraTokenContract(addressToken1) 
-      const accounts = (await window.ethereum.request({ method: 'eth_accounts', }))[0]
+      const contractToken0 = getAxelraTokenContract(addressToken0)
+      const contractToken1 = getAxelraTokenContract(addressToken1)
+      const accounts = (
+        await window.ethereum.request({ method: 'eth_accounts' })
+      )[0]
       const [result0, result1] = await Promise.all([
         contractToken0.balanceOf(accounts),
         contractToken1.balanceOf(accounts),
@@ -225,11 +273,13 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
         artifactCrossDexPair.abi,
         providerRPCAvalanchefuji
       ) as CrossDexPair
-      const accounts = (await window.ethereum.request({ method: 'eth_accounts', }))[0]
-       const [resultUser, resultTotalSupply] = await Promise.all([
-         contractTokenPairLP.balanceOf(accounts),
-         contractTokenPairLP.totalSupply(),
-       ]) 
+      const accounts = (
+        await window.ethereum.request({ method: 'eth_accounts' })
+      )[0]
+      const [resultUser, resultTotalSupply] = await Promise.all([
+        contractTokenPairLP.balanceOf(accounts),
+        contractTokenPairLP.totalSupply(),
+      ])
       setUserBalancePairLP(toEther(resultUser))
       setTotalSupplyPairLP(toEther(resultTotalSupply))
       setloadingBalancePairLP(false)
@@ -239,14 +289,16 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
     }
   }
 
-  const sendTxBridgeSwap = async (  
-        amountIn: string,
-        amountOutMin:string,
-        addressTokenIN:string , 
-        addressTokenOut:string , 
-        destinationAddressReceiveToken:string,
-        destinationChainReceiveToken:string 
-        ) => {
+  // Secondary Chain use
+
+  const sendTxBridgeSwap = async (
+    amountIn: string,
+    amountOutMin: string,
+    addressTokenIN: string,
+    addressTokenOut: string,
+    destinationAddressReceiveToken: string,
+    destinationChainReceiveToken: string
+  ) => {
     try {
       if (!window.ethereum) console.log('Please install metamask')
       if (!CheckAvailableChainByChainID(chain?.id)) throw new Error()
@@ -274,20 +326,205 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
         }
       )
       await transactionHash.wait()
-       loadUserBalanceToken(
-         FindAddressTokenByChainID(chain?.id, true),
-         FindAddressTokenByChainID(chain?.id, false)
-       )
-       return transactionHash.hash
-    } catch (error:any) {
-       throw new Error(error.reason)
+      loadUserBalanceToken(
+        FindAddressTokenByChainID(chain?.id, true),
+        FindAddressTokenByChainID(chain?.id, false)
+      )
+      return transactionHash.hash
+    } catch (error: any) {
+      throw new Error(error.reason)
     }
   }
 
+  const sendTxBridgeAddLiquidity = async (
+    amount0: string,
+    amount1: string,
+    addressToken0: string,
+    addressToken1: string,
+    isForceAdd: boolean,
+    destinationAddressReceiveToken: string,
+    destinationChainReceiveToken: string
+  ) => {
+    try {
+      if (!window.ethereum) console.log('Please install metamask')
+      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error()
+      const signer = providerWindow.getSigner()
+      const contractSecondaryChainAxelra = new ethers.Contract(
+        FindAddressAxelraByChainID(chain?.id),
+        artifactSecondaryChainAxelraDexMsg.abi,
+        signer
+      ) as SecondaryChainAxelraDexMsg
+      const transactionHash =
+        await contractSecondaryChainAxelra.bridgeAddLiquidity(
+          toWei(amount0),
+          toWei(amount1),
+          addressToken0,
+          addressToken1,
+          isForceAdd,
+          destinationAddressReceiveToken,
+          destinationChainReceiveToken,
+          {
+            value: toWei('2'),
+          }
+        )
+      await transactionHash.wait()
+      loadUserBalanceToken(
+        FindAddressTokenByChainID(chain?.id, true),
+        FindAddressTokenByChainID(chain?.id, false)
+      )
+      return transactionHash.hash
+    } catch (error: any) {
+      throw new Error(error.reason)
+    }
+  }
+
+  const sendTxBridgeRemoveLiquidity = async (
+    amountliquidity: string,
+    addressToken0: string,
+    addressToken1: string,
+    destinationAddressReceiveToken: string,
+    destinationChainReceiveToken: string
+  ) => {
+    try {
+      if (!window.ethereum) console.log('Please install metamask')
+      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error()
+      const signer = providerWindow.getSigner()
+      const contractSecondaryChainAxelra = new ethers.Contract(
+        FindAddressAxelraByChainID(chain?.id),
+        artifactSecondaryChainAxelraDexMsg.abi,
+        signer
+      ) as SecondaryChainAxelraDexMsg
+      const transactionHash =
+        await contractSecondaryChainAxelra.bridgeRemoveLiquidity(
+          toWei(amountliquidity),
+          addressToken0,
+          addressToken1,
+          destinationAddressReceiveToken,
+          destinationChainReceiveToken,
+          {
+            value: toWei('2'),
+          }
+        )
+      await transactionHash.wait()
+      return transactionHash.hash
+    } catch (error: any) {
+      throw new Error(error.reason)
+    }
+  }
+
+  // Main Chain use
+  const sendTxSwapExactTokensForTokens = async (
+    amountIn: string,
+    amountOutMin: string,
+    addressTokenIN: string,
+    addressTokenOut: string,
+    to: string,
+    deadline: number
+  ) => {
+    try {
+      if (!window.ethereum) console.log('Please install metamask')
+      if (chain?.id != ChainIDMainChainDex) throw new Error()
+      const signer = providerWindow.getSigner()
+      const contractCrossDexRouter = new ethers.Contract(
+        ContractAddressRouter,
+        artifactCrossDexRouter.abi,
+        signer
+      ) as CrossDexRouter
+      const transactionHash =
+        await contractCrossDexRouter.swapExactTokensForTokens(
+          toWei(amountIn),
+          toWei(amountOutMin),
+          addressTokenIN,
+          addressTokenOut,
+          to,
+          deadline
+        )
+      await transactionHash.wait()
+      loadUserBalanceToken(
+        FindAddressTokenByChainID(chain?.id, true),
+        FindAddressTokenByChainID(chain?.id, false)
+      )
+      return transactionHash.hash
+    } catch (error: any) {
+      throw new Error(error.reason)
+    }
+  }
+
+  const sendTxAddLiquidity = async (
+    amount0: string,
+    amount1: string,
+    addressToken0: string,
+    addressToken1: string,
+    isForceAdd:boolean,
+    to: string,
+    deadline: number
+  ) => {
+    try {
+      if (!window.ethereum) console.log('Please install metamask')
+      if (chain?.id != ChainIDMainChainDex) throw new Error()
+      const signer = providerWindow.getSigner()
+      const contractCrossDexRouter = new ethers.Contract(
+        ContractAddressRouter,
+        artifactCrossDexRouter.abi,
+        signer
+      ) as CrossDexRouter
+      const transactionHash = await contractCrossDexRouter.addLiquidity(
+        toWei(amount0),
+        toWei(amount1),
+        addressToken0,
+        addressToken1,
+        isForceAdd,
+        to,
+        deadline
+      )
+      await transactionHash.wait()
+      loadUserBalanceToken(
+        FindAddressTokenByChainID(chain?.id, true),
+        FindAddressTokenByChainID(chain?.id, false)
+      )
+      return transactionHash.hash
+    } catch (error: any) {
+      throw new Error(error.reason)
+    }
+  }
+
+  const sendTxRemoveLiquidity = async (
+    liquidity: string,
+    amount1: string,
+    addressToken0: string,
+    addressToken1: string,
+    to: string,
+    deadline: number
+  ) => {
+    try {
+      if (!window.ethereum) console.log('Please install metamask')
+      if (chain?.id != ChainIDMainChainDex) throw new Error()
+      const signer = providerWindow.getSigner()
+      const contractCrossDexRouter = new ethers.Contract(
+        ContractAddressRouter,
+        artifactCrossDexRouter.abi,
+        signer
+      ) as CrossDexRouter
+      const transactionHash = await contractCrossDexRouter.removeLiquidity(
+        toWei(liquidity),
+        addressToken0,
+        addressToken1,
+        to,
+        deadline
+      )
+      await transactionHash.wait()
+      loadUserBalanceToken(
+        FindAddressTokenByChainID(chain?.id, true),
+        FindAddressTokenByChainID(chain?.id, false)
+      )
+      return transactionHash.hash
+    } catch (error: any) {
+      throw new Error(error.reason)
+    }
+  }
 
   const addlistenerEvents = async () => {
     try {
- 
       if (window.ethereum != undefined) {
         //@ts-ignore
         window.ethereum.on('accountsChanged', () => {
@@ -304,7 +541,7 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
       }
     } catch (error) {}
   }
-  
+
   return (
     <ContractContext.Provider
       value={{
@@ -320,6 +557,11 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
         loadingBalancePairLP,
         totalSupplyPairLP,
         sendTxBridgeSwap,
+        sendTxBridgeRemoveLiquidity,
+        sendTxBridgeAddLiquidity,
+        sendTxSwapExactTokensForTokens,
+        sendTxRemoveLiquidity,
+        sendTxAddLiquidity,
       }}
     >
       {!initialLoading && children}
