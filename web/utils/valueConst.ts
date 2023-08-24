@@ -5,6 +5,7 @@ export const ChainIDFantomTestnet = 4002
 export const ContractAddressFactory = '0x9ed60E9C2b11243daF4F85981bc6eEC210C26561'
 export const ContractAddressRouter = '0xdc5Faa26e349c41CD17110B5EB295A980EFA9aBA'
 export const ChainNameMainChainDex = 'Avalanche'
+export const ChainIDMainChainDex = ChainIDAvalanchefuji
 export const AllowListTradeToken = {
   Fantom: {
     Token0: {

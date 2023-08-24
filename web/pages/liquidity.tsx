@@ -9,7 +9,7 @@ import { useAccount, useNetwork } from 'wagmi'
 import MyRecipientAddressModal from '../components/MyRecipientAddressModal'
 import { Switch } from '@headlessui/react'
 import { LightTooltip } from '../utils/muiStyled'
-import { ChainIDAvalanchefuji, ChainNameMainChainDex, listBoxChainName, listPairLPMainChain } from '../utils/valueConst'
+import {  ChainIDMainChainDex,ChainNameMainChainDex, listBoxChainName, listPairLPMainChain } from '../utils/valueConst'
 import { FindAddressTokenByChainID, GetChainNameByChainId } from '../utils/findByChainId'
 import { ContractContext } from '../context/contractContext'
 import { notificationToast } from '../utils/notificationToastify'
@@ -72,10 +72,10 @@ function liquidity({}: Props) {
 
   // list trade token
   const [addressToken0MainChain, setAddressToken0MainChain] = useState<string>(
-    FindAddressTokenByChainID(ChainIDAvalanchefuji, true)
+    FindAddressTokenByChainID(ChainIDMainChainDex, true)
   )
   const [addressToken1MainChain, setAddressToken1MainChain] = useState<string>(
-    FindAddressTokenByChainID(ChainIDAvalanchefuji, false)
+    FindAddressTokenByChainID(ChainIDMainChainDex, false)
   )
   const [addressToken0SecondaryChain, setAddressToken0SecondaryChain] =
     useState<string>(FindAddressTokenByChainID(chain?.id, true))
@@ -357,7 +357,7 @@ function liquidity({}: Props) {
             </div>
             <button
               onClick={() => {
-                if (chain?.id == ChainIDAvalanchefuji) {
+                if (chain?.id == ChainIDMainChainDex) {
                   console.log('add lp')
                 } else {
                   // notificationToast(
@@ -522,7 +522,7 @@ function liquidity({}: Props) {
 
             <button
               onClick={() => {
-                if (chain?.id == ChainIDAvalanchefuji) {
+                if (chain?.id == ChainIDMainChainDex) {
                   console.log('remove lp')
                 } else {
                 }
@@ -565,31 +565,33 @@ function liquidity({}: Props) {
                 <p>0.1%</p>
               </div>
             </div>
-            <div
-              className="bg-[#121A2A] flex flex-col mt-2 rounded-lg py-2 px-4 justify-center items-start 
+            {GetChainNameByChainId(chain?.id) != ChainNameMainChainDex && (
+              <div
+                className="bg-[#121A2A] flex flex-col mt-2 rounded-lg py-2 px-4 justify-center items-start 
            text-gray-300  text-xs gap-2 "
-            >
-              <div className="flex flex-row w-full items-center justify-between ">
-                <div>Recipient Address</div>
-                <div className="flex gap-1">
-                  <span> {shortenAddress(recipientAddress)} </span>
-                  <span
-                    className="text-blue-500 underline cursor-pointer hover:opacity-60 transition-all"
-                    onClick={() => setShowModalEditAddress(true)}
-                  >
-                    Edit
-                  </span>
+              >
+                <div className="flex flex-row w-full items-center justify-between ">
+                  <div>Recipient Address</div>
+                  <div className="flex gap-1">
+                    <span> {shortenAddress(recipientAddress)} </span>
+                    <span
+                      className="text-blue-500 underline cursor-pointer hover:opacity-60 transition-all"
+                      onClick={() => setShowModalEditAddress(true)}
+                    >
+                      Edit
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-row w-full items-center justify-between">
+                  <div>Destination Chain ReceiveToken</div>
+                  <MyListBoxChain
+                    listItem={listBoxChainName}
+                    nowChainName={destinationChainName}
+                    setDestinationChainName={setDestinationChainName}
+                  />
                 </div>
               </div>
-              <div className="flex flex-row w-full items-center justify-between">
-                <div>Destination Chain ReceiveToken</div>
-                <MyListBoxChain
-                  listItem={listBoxChainName}
-                  nowChainName={destinationChainName}
-                  setDestinationChainName={setDestinationChainName}
-                />
-              </div>
-            </div>
+            )}
           </>
         )}
       </div>

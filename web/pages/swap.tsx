@@ -14,7 +14,7 @@ import MySettingModal from '../components/MySettingModal'
 import { ContractContext } from '../context/contractContext'
 import { shortenAddress } from '../utils/shortenAddress'
 import { FindAddressTokenByChainID, GetChainNameByChainId } from '../utils/findByChainId'
-import { ChainIDAvalanchefuji, ChainNameMainChainDex, listBoxChainName } from '../utils/valueConst'
+import { ChainIDMainChainDex,ChainNameMainChainDex, listBoxChainName } from '../utils/valueConst'
 import { notificationToast } from '../utils/notificationToastify'
 
 type Props = {}
@@ -56,8 +56,8 @@ function swap({}: Props) {
   const [inputIn, setInputIn] = useState<string>('')
   const [inputOut, setInputOut] = useState<string>('')
   // list trade token
-  const [addressToken0MainChain, setAddressToken0MainChain] = useState<string>(FindAddressTokenByChainID(ChainIDAvalanchefuji,true))
-  const [addressToken1MainChain, setAddressToken1MainChain] = useState<string>(FindAddressTokenByChainID(ChainIDAvalanchefuji,false))
+  const [addressToken0MainChain, setAddressToken0MainChain] = useState<string>(FindAddressTokenByChainID(ChainIDMainChainDex,true))
+  const [addressToken1MainChain, setAddressToken1MainChain] = useState<string>(FindAddressTokenByChainID(ChainIDMainChainDex,false))
   const [addressToken0SecondaryChain, setAddressToken0SecondaryChain] = useState<string>(FindAddressTokenByChainID(chain?.id,true))
   const [addressToken1SecondaryChain, setAddressToken1SecondaryChain] = useState<string>(FindAddressTokenByChainID(chain?.id,false))
 
@@ -240,7 +240,7 @@ function swap({}: Props) {
         </div>
         <button
           onClick={() => {
-            if (chain?.id == ChainIDAvalanchefuji) {
+            if (chain?.id == ChainIDMainChainDex) {
               console.log('swap')
             } else {
               notificationToast(
