@@ -5,6 +5,6 @@ export const filterErrorMessage = (message: string | undefined): string => {
         return message
     }
   } else {
-    return 'wrong network / disconnect wallet'
+    return 'something went wrong'
   }
 }

@@ -132,7 +132,6 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
   }
 
   useEffect(() => {
-    if (!window.ethereum) return alert('Please install metamask')
     const loadInint = async () => {
       addlistenerEvents()
       if (chain) {
@@ -140,12 +139,12 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
           FindAddressTokenByChainID(chain.id, true),
           FindAddressTokenByChainID(chain.id, false)
         )
-        loadReservePairMainChain(
-          FindAddressTokenByChainID(ChainIDAvalanchefuji, true),
-          FindAddressTokenByChainID(ChainIDAvalanchefuji, false)
-        )
-        loadPairLPToken(listPairLPMainChain['USDT-USDC'].contractAddress)
       }
+      loadReservePairMainChain(
+        FindAddressTokenByChainID(ChainIDAvalanchefuji, true),
+        FindAddressTokenByChainID(ChainIDAvalanchefuji, false)
+      )
+      loadPairLPToken(listPairLPMainChain['USDT-USDC'].contractAddress)
     }
     loadInint()
     setInitialLoading(false)
@@ -157,7 +156,6 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
     addressTokenOut: string
   ) => {
     try {
-      if (!window.ethereum) return ''
       const result = await contractCrossDexRouter.getAmountsOut(
         toWei(amountIn),
         addressTokenIn,
@@ -176,7 +174,6 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
     addressTokenOut: string
   ) => {
     try {
-      if (!window.ethereum) return ''
       const result = await contractCrossDexRouter.getAmountsIn(
         toWei(amountOut),
         addressTokenIn,
@@ -195,7 +192,6 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
     reserve1: string
   ) => {
     try {
-      if (!window.ethereum) return ''
       const result = await contractCrossDexRouter.quote(
         toWei(amount0),
         toWei(reserve0),
@@ -213,7 +209,6 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
     addressToken1: string
   ) => {
     try {
-      if (!window.ethereum) return
       const pairLP = await contractCrossDexFactory.getPair(
         addressToken0,
         addressToken1
@@ -233,6 +228,7 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
         [address1]: toEther(result._reserve1),
       }
       setReserve(DTO)
+      console.log(DTO)
     } catch (error) {
       console.log(error)
     }
@@ -266,22 +262,26 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
   }
   const loadPairLPToken = async (addressPairLP: string) => {
     try {
-      if (!window.ethereum) return
       setloadingBalancePairLP(true)
+
       const contractTokenPairLP = new ethers.Contract(
         addressPairLP,
         artifactCrossDexPair.abi,
         providerRPCAvalanchefuji
       ) as CrossDexPair
-      const accounts = (
-        await window.ethereum.request({ method: 'eth_accounts' })
-      )[0]
-      const [resultUser, resultTotalSupply] = await Promise.all([
-        contractTokenPairLP.balanceOf(accounts),
-        contractTokenPairLP.totalSupply(),
-      ])
-      setUserBalancePairLP(toEther(resultUser))
+
+      const  resultTotalSupply  = await contractTokenPairLP.totalSupply()
       setTotalSupplyPairLP(toEther(resultTotalSupply))
+
+      if (window.ethereum) {
+        const accounts = (
+          await window.ethereum.request({ method: 'eth_accounts' })
+          )[0]
+        const  resultUser = await   contractTokenPairLP.balanceOf(accounts)
+        setUserBalancePairLP(toEther(resultUser))
+      }
+
+
       setloadingBalancePairLP(false)
     } catch (error) {
       console.log(error)
@@ -301,7 +301,7 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
   ) => {
     try {
       if (!window.ethereum) console.log('Please install metamask')
-      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error()
+      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error('wrong network / disconnect wallet')
       // console.log('amountIn', amountIn)
       // console.log('amountOutMin', amountOutMin)
       // console.log('addressTokenIN', addressTokenIN)
@@ -332,7 +332,13 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
       )
       return transactionHash.hash
     } catch (error: any) {
-      throw new Error(error.reason)
+      if (error.reason) {
+        throw new Error(error.reason)
+      } else if (error.data?.message) {
+        throw new Error(error.data.message)
+      } else {
+        throw new Error(error)
+      }
     }
   }
 
@@ -347,7 +353,7 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
   ) => {
     try {
       if (!window.ethereum) console.log('Please install metamask')
-      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error()
+      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error('wrong network / disconnect wallet')
       const signer = providerWindow.getSigner()
       const contractSecondaryChainAxelra = new ethers.Contract(
         FindAddressAxelraByChainID(chain?.id),
@@ -374,7 +380,13 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
       )
       return transactionHash.hash
     } catch (error: any) {
-      throw new Error(error.reason)
+      if (error.reason) {
+        throw new Error(error.reason)
+      } else if (error.data.message) {
+        throw new Error(error.data.message)
+      } else {
+        throw new Error()
+      }
     }
   }
 
@@ -387,7 +399,7 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
   ) => {
     try {
       if (!window.ethereum) console.log('Please install metamask')
-      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error()
+      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error('wrong network / disconnect wallet')
       const signer = providerWindow.getSigner()
       const contractSecondaryChainAxelra = new ethers.Contract(
         FindAddressAxelraByChainID(chain?.id),
@@ -408,7 +420,13 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
       await transactionHash.wait()
       return transactionHash.hash
     } catch (error: any) {
-      throw new Error(error.reason)
+      if (error.reason) {
+        throw new Error(error.reason)
+      } else if (error.data.message) {
+        throw new Error(error.data.message)
+      } else {
+        throw new Error()
+      }
     }
   }
 
@@ -423,7 +441,8 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
   ) => {
     try {
       if (!window.ethereum) console.log('Please install metamask')
-      if (chain?.id != ChainIDMainChainDex) throw new Error()
+      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error('wrong network / disconnect wallet')
+      if (chain?.id != ChainIDMainChainDex) throw new Error('Only use in main chain')
       const signer = providerWindow.getSigner()
       const contractCrossDexRouter = new ethers.Contract(
         ContractAddressRouter,
@@ -446,7 +465,13 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
       )
       return transactionHash.hash
     } catch (error: any) {
-      throw new Error(error.reason)
+      if (error.reason) {
+        throw new Error(error.reason)
+      } else if (error.data.message) {
+        throw new Error(error.data.message)
+      } else {
+        throw new Error()
+      }
     }
   }
 
@@ -461,7 +486,8 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
   ) => {
     try {
       if (!window.ethereum) console.log('Please install metamask')
-      if (chain?.id != ChainIDMainChainDex) throw new Error()
+      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error('wrong network / disconnect wallet')
+      if (chain?.id != ChainIDMainChainDex) throw new Error('Only use in main chain')
       const signer = providerWindow.getSigner()
       const contractCrossDexRouter = new ethers.Contract(
         ContractAddressRouter,
@@ -484,7 +510,13 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
       )
       return transactionHash.hash
     } catch (error: any) {
-      throw new Error(error.reason)
+      if (error.reason) {
+        throw new Error(error.reason)
+      } else if (error.data.message) {
+        throw new Error(error.data.message)
+      } else {
+        throw new Error()
+      }
     }
   }
 
@@ -498,7 +530,8 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
   ) => {
     try {
       if (!window.ethereum) console.log('Please install metamask')
-      if (chain?.id != ChainIDMainChainDex) throw new Error()
+      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error('wrong network / disconnect wallet')
+      if (chain?.id != ChainIDMainChainDex) throw new Error('Only use in main chain')
       const signer = providerWindow.getSigner()
       const contractCrossDexRouter = new ethers.Contract(
         ContractAddressRouter,
@@ -518,8 +551,14 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
         FindAddressTokenByChainID(chain?.id, false)
       )
       return transactionHash.hash
-    } catch (error: any) {
-      throw new Error(error.reason)
+    } catch (error: any){
+      if (error.reason) {
+        throw new Error(error.reason)
+      } else if (error.data.message) {
+        throw new Error(error.data.message)
+      } else {
+        throw new Error()
+      }
     }
   }
 

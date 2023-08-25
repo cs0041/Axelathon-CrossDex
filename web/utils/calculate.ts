@@ -8,13 +8,11 @@ export const calculateLPReceived = (
   let liquidity = 0
   if (Number(totalSupply) == 0) {
     liquidity = _sqrt(Number(amount0) * Number(amount1))
-    console.log('liquidity1', liquidity)
   } else {
     liquidity = Math.min(
       (Number(amount0) * Number(totalSupply)) / Number(reserve0),
       (Number(amount1) * Number(totalSupply)) / Number(reserve1)
     )
-    console.log('liquidity2', liquidity)
   }
 
   return liquidity

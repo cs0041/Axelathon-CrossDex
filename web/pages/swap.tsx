@@ -242,16 +242,7 @@ function swap({}: Props) {
         <button
           onClick={() => {
             if (chain?.id == ChainIDMainChainDex) {
-               notificationToast(
-                 sendTxBridgeSwap(
-                   inputIn,
-                   (Number(inputOut) * ((100 - slippage) / 100)).toString(),
-                   addressToken0SecondaryChain,
-                   addressToken1SecondaryChain,
-                   recipientAddress!,
-                   destinationChainName
-                 )
-               )
+              console.log('swap')
             } else {
               notificationToast(
                 sendTxBridgeSwap(
