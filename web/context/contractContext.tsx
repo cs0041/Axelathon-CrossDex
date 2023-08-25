@@ -13,7 +13,7 @@ import {
   toEtherFloatingPoint,
   toFixUnits
 } from '../utils/UnitInEther'
-import { useNetwork } from 'wagmi'
+import { useAccount, useNetwork } from 'wagmi'
 import { CheckAvailableChainByChainID, FindAddressAxelraByChainID, FindAddressTokenByChainID, FindRPCByChainID } from '../utils/findByChainId'
 import { ContractAddressRouter,ContractAddressFactory, ChainIDAvalanchefuji ,listPairLPMainChain, ChainIDMainChainDex} from '../utils/valueConst'
 
@@ -81,6 +81,7 @@ interface ChildrenProps {
 
 export const ContractProvider = ({ children }: ChildrenProps) => {
   const { chain } = useNetwork()
+  const { isDisconnected } = useAccount()
   let providerWindow: ethers.providers.Web3Provider
   let providerRPCAvalanchefuji: ethers.providers.JsonRpcProvider
   providerRPCAvalanchefuji = new ethers.providers.JsonRpcProvider(
@@ -300,13 +301,8 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
   ) => {
     try {
       if (!window.ethereum) console.log('Please install metamask')
-      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error('wrong network / disconnect wallet')
-      // console.log('amountIn', amountIn)
-      // console.log('amountOutMin', amountOutMin)
-      // console.log('addressTokenIN', addressTokenIN)
-      // console.log('addressTokenOut', addressTokenOut)
-      // console.log('destinationAddressReceiveToken', destinationAddressReceiveToken)
-      // console.log('destinationChainReceiveToken', destinationChainReceiveToken)
+      if (isDisconnected) throw new Error('disconnect wallet')
+      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error('wrong network')
       const signer = providerWindow.getSigner()
       const contractSecondaryChainAxelra = new ethers.Contract(
         FindAddressAxelraByChainID(chain?.id),
@@ -352,7 +348,8 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
   ) => {
     try {
       if (!window.ethereum) console.log('Please install metamask')
-      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error('wrong network / disconnect wallet')
+      if (isDisconnected) throw new Error('disconnect wallet')
+      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error('wrong network')
       const signer = providerWindow.getSigner()
       const contractSecondaryChainAxelra = new ethers.Contract(
         FindAddressAxelraByChainID(chain?.id),
@@ -381,10 +378,10 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
     } catch (error: any) {
       if (error.reason) {
         throw new Error(error.reason)
-      } else if (error.data.message) {
+      } else if (error.data?.message) {
         throw new Error(error.data.message)
       } else {
-        throw new Error()
+        throw new Error(error)
       }
     }
   }
@@ -398,7 +395,8 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
   ) => {
     try {
       if (!window.ethereum) console.log('Please install metamask')
-      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error('wrong network / disconnect wallet')
+      if (isDisconnected) throw new Error('disconnect wallet')
+      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error('wrong network')
       const signer = providerWindow.getSigner()
       const contractSecondaryChainAxelra = new ethers.Contract(
         FindAddressAxelraByChainID(chain?.id),
@@ -421,10 +419,10 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
     } catch (error: any) {
       if (error.reason) {
         throw new Error(error.reason)
-      } else if (error.data.message) {
+      } else if (error.data?.message) {
         throw new Error(error.data.message)
       } else {
-        throw new Error()
+        throw new Error(error)
       }
     }
   }
@@ -440,7 +438,8 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
   ) => {
     try {
       if (!window.ethereum) console.log('Please install metamask')
-      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error('wrong network / disconnect wallet')
+      if (isDisconnected) throw new Error('disconnect wallet')
+      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error('wrong network')
       if (chain?.id != ChainIDMainChainDex) throw new Error('Only use in main chain')
       const signer = providerWindow.getSigner()
       const contractCrossDexRouter = new ethers.Contract(
@@ -466,10 +465,10 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
     } catch (error: any) {
       if (error.reason) {
         throw new Error(error.reason)
-      } else if (error.data.message) {
+      } else if (error.data?.message) {
         throw new Error(error.data.message)
       } else {
-        throw new Error()
+        throw new Error(error)
       }
     }
   }
@@ -485,7 +484,8 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
   ) => {
     try {
       if (!window.ethereum) console.log('Please install metamask')
-      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error('wrong network / disconnect wallet')
+      if (isDisconnected) throw new Error('disconnect wallet')
+      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error('wrong network')
       if (chain?.id != ChainIDMainChainDex) throw new Error('Only use in main chain')
       const signer = providerWindow.getSigner()
       const contractCrossDexRouter = new ethers.Contract(
@@ -511,10 +511,10 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
     } catch (error: any) {
       if (error.reason) {
         throw new Error(error.reason)
-      } else if (error.data.message) {
+      } else if (error.data?.message) {
         throw new Error(error.data.message)
       } else {
-        throw new Error()
+        throw new Error(error)
       }
     }
   }
@@ -528,7 +528,8 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
   ) => {
     try {
       if (!window.ethereum) console.log('Please install metamask')
-      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error('wrong network / disconnect wallet')
+      if (isDisconnected) throw new Error('disconnect wallet')
+      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error('wrong network')
       if (chain?.id != ChainIDMainChainDex) throw new Error('Only use in main chain')
       const signer = providerWindow.getSigner()
       const contractCrossDexRouter = new ethers.Contract(
@@ -549,13 +550,13 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
         FindAddressTokenByChainID(chain?.id, false)
       )
       return transactionHash.hash
-    } catch (error: any){
+    } catch (error: any) {
       if (error.reason) {
         throw new Error(error.reason)
-      } else if (error.data.message) {
+      } else if (error.data?.message) {
         throw new Error(error.data.message)
       } else {
-        throw new Error()
+        throw new Error(error)
       }
     }
   }
