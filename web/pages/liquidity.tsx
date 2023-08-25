@@ -14,6 +14,7 @@ import { FindAddressTokenByChainID, GetChainNameByChainId } from '../utils/findB
 import { ContractContext } from '../context/contractContext'
 import { notificationToast } from '../utils/notificationToastify'
 import { shortenAddress } from '../utils/shortenAddress'
+import { calculateAmountTokenBackWhenRemoveLP, calculateLPReceived, calculateShareOfPoolPercentage } from '../utils/calculate'
 
 type Props = {}
 
@@ -25,12 +26,13 @@ enum TabBar {
 
 function liquidity({}: Props) {
   const {
-    
     reserve,
     userBalanceToken,
     userBalancePairLP,
     getQuoteForAddLiquidity,
     loadingUserBalanceToken,
+    totalSupplyPairLP,
+    loadingBalancePairLP,
   } = useContext(ContractContext)
 
 
@@ -125,85 +127,130 @@ function liquidity({}: Props) {
             <div className="bg-[#121A2A] flex flex-col justify-center items-center text-gray-300 rounded-lg  p-6">
               <h1>ADD LIQUIDITY TO RECEIVE LP TOKENS</h1>
             </div>
-            {/* <div className="bg-[#121A2A] rounded-lg  p-2">
-              <div className="flex flex-col gap-2 justify-center items-center text-gray-500">
-                <InboxIcon className="h-8 w-8 " />
-                <h1>No liquidity found.</h1>
-                <h1 className="mt-3">
-                  Click button below to add your liquidity
-                </h1>
+            {loadingBalancePairLP ? (
+              <div className="flex justify-center items-center p-3">
+                <span className="loader"></span>
               </div>
-            </div> 
-            <button
-              className=" flex w-full py-2 rounded-2xl bg-blue-700 items-center justify-center 
-         hover:bg-blue-600 transition-all "
-              onClick={() => setStatusTabBar(TabBar.Add)}
-            >
-              <h1 className="text-xl font-bold">+ Add Liquidity</h1>
-            </button> */}
-            <div className="flex flex-col gap-2 ">
-              <div>
-                <Disclosure>
-                  {({ open }) => (
-                    <>
-                      <Disclosure.Button
-                        className={`bg-[#121A2A]  p-2  flex w-full justify-between  items-center 
+            ) : (
+              <>
+                {Number(userBalancePairLP) > 0 ? (
+                  <div className="flex flex-col gap-2 ">
+                    <div>
+                      <Disclosure>
+                        {({ open }) => (
+                          <>
+                            <Disclosure.Button
+                              className={`bg-[#121A2A] p-2  flex w-full justify-between  items-center  hover:bg-blue-700 transition-all
                         ${open ? 'rounded-t-lg' : 'rounded-lg'} `}
-                      >
-                        <div className="flex flex-row gap-2 bg-gray-700 py-2 px-3 rounded-lg">
-                          <img src="logo.png" alt="logo" className="w-6 " />
-                          <span>USDT - USDC</span>
-                        </div>
+                            >
+                              <div className="flex flex-row gap-2 bg-gray-700 py-2 px-3 rounded-lg">
+                                <img
+                                  src="logo.png"
+                                  alt="logo"
+                                  className="w-6 "
+                                />
+                                <span>
+                                  {listPairLPMainChain['USDT-USDC'].symbol}
+                                </span>
+                              </div>
 
-                        <div className="flex flex-row gap-2 items-center justify-center">
-                          <span>{userBalancePairLP}</span>
-                          <ChevronUpIcon
-                            className={`${
-                              open ? 'rotate-180 transform' : ''
-                            } h-5 w-5 text-white`}
-                          />
-                        </div>
-                      </Disclosure.Button>
-                      <Disclosure.Panel className="bg-[#121A2A] rounded-b-lg flex flex-col justify-between px-3 pt-4 pb-2 text-sm gap-2  ">
-                        <div className="flex flex-row justify-between items-center">
-                          <span>Your total pool tokens</span>
-                          <span>12.21</span>
-                        </div>
-                        <div className="flex flex-row justify-between items-center">
-                          <span>Pooled AXL</span>
-                          <span>30.32</span>
-                        </div>
-                        <div className="flex flex-row justify-between items-center">
-                          <span>Pooled USDT</span>
-                          <span>20.51</span>
-                        </div>
-                        <div className="flex flex-row justify-between items-center">
-                          <span>Your pool share</span>
-                          <span>0.1%</span>
-                        </div>
+                              <div className="flex flex-row gap-2 items-center justify-center">
+                                <span>
+                                  {Number(userBalancePairLP).toFixed(4)}
+                                </span>
+                                <ChevronUpIcon
+                                  className={`${
+                                    open ? 'rotate-180 transform' : ''
+                                  } h-5 w-5 text-white`}
+                                />
+                              </div>
+                            </Disclosure.Button>
+                            <Disclosure.Panel className="bg-[#121A2A] rounded-b-lg flex flex-col justify-between px-3 pt-4 pb-2 text-sm gap-2  ">
+                              <div className="flex flex-row justify-between items-center">
+                                <span>Your total pool tokens</span>
+                                <span>
+                                  {Number(userBalancePairLP).toFixed(4)}
+                                </span>
+                              </div>
+                              <div className="flex flex-row justify-between items-center">
+                                <span>Pooled USDT</span>
+                                <span>
+                                  {' '}
+                                  {calculateAmountTokenBackWhenRemoveLP(
+                                    totalSupplyPairLP,
+                                    userBalancePairLP,
+                                    reserve[addressToken0MainChain],
+                                    reserve[addressToken1MainChain]
+                                  ).token0.toFixed(4)}
+                                </span>
+                              </div>
+                              <div className="flex flex-row justify-between items-center">
+                                <span>Pooled USDC</span>
+                                <span>
+                                  {' '}
+                                  {calculateAmountTokenBackWhenRemoveLP(
+                                    totalSupplyPairLP,
+                                    userBalancePairLP,
+                                    reserve[addressToken0MainChain],
+                                    reserve[addressToken1MainChain]
+                                  ).token1.toFixed(4)}
+                                </span>
+                              </div>
+                              <div className="flex flex-row justify-between items-center">
+                                <span>Your pool share</span>
+                                <p>
+                                  {calculateShareOfPoolPercentage(
+                                    totalSupplyPairLP,
+                                    userBalancePairLP
+                                  ).toFixed(4)}
+                                  %
+                                </p>
+                              </div>
 
-                        <div className="flex flex-row justify-between items-center gap-2">
-                          <button
-                            className=" flex w-full py-2 rounded-lg bg-blue-700 items-center justify-center 
+                              <div className="flex flex-row justify-between items-center gap-2">
+                                <button
+                                  className=" flex w-full py-2 rounded-lg bg-blue-700 items-center justify-center 
                         hover:bg-blue-600 transition-all "
-                            onClick={() => setStatusTabBar(TabBar.Add)}
-                          >
-                            <h1 className="text-xl font-bold">ADD</h1>
-                          </button>
-                          <button
-                            className=" flex w-full py-2 rounded-lg bg-blue-700 items-center justify-center 
+                                  onClick={() => setStatusTabBar(TabBar.Add)}
+                                >
+                                  <h1 className="text-xl font-bold">ADD</h1>
+                                </button>
+                                <button
+                                  className=" flex w-full py-2 rounded-lg bg-blue-700 items-center justify-center 
                         hover:bg-blue-600 transition-all "
-                            onClick={() => setStatusTabBar(TabBar.Remove)}
-                          >
-                            <h1 className="text-xl font-bold">REMOVE</h1>
-                          </button>
-                        </div>
-                      </Disclosure.Panel>
-                    </>
-                  )}
-                </Disclosure>
-              </div>
-            </div>
+                                  onClick={() => setStatusTabBar(TabBar.Remove)}
+                                >
+                                  <h1 className="text-xl font-bold">REMOVE</h1>
+                                </button>
+                              </div>
+                            </Disclosure.Panel>
+                          </>
+                        )}
+                      </Disclosure>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="bg-[#121A2A] rounded-lg  p-2">
+                      <div className="flex flex-col gap-2 justify-center items-center text-gray-500">
+                        <InboxIcon className="h-8 w-8 " />
+                        <h1>No liquidity found.</h1>
+                        <h1 className="mt-3">
+                          Click button below to add your liquidity
+                        </h1>
+                      </div>
+                    </div>
+                    <button
+                      className=" flex w-full py-2 rounded-2xl bg-blue-700 items-center justify-center 
+              hover:bg-blue-600 transition-all "
+                      onClick={() => setStatusTabBar(TabBar.Add)}
+                    >
+                      <h1 className="text-xl font-bold">+ Add Liquidity</h1>
+                    </button>
+                  </>
+                )}
+              </>
+            )}
           </div>
         )}
         {statusTabBar == TabBar.Add && (
@@ -408,12 +455,40 @@ function liquidity({}: Props) {
          text-gray-300  text-xs"
             >
               <div>
-                <p>AXL-USDT LP Received</p>
+                <p>{listPairLPMainChain['USDT-USDC'].symbol} LP Received</p>
                 <p>Share of Pool</p>
               </div>
               <div className="text-right">
-                <p>0.00</p>
-                <p>0.1%</p>
+                {loadingPrice ? (
+                  <div>calculating...</div>
+                ) : (
+                  <p>
+                    {calculateLPReceived(
+                      totalSupplyPairLP,
+                      inputIn,
+                      inputOut,
+                      reserve[addressToken0MainChain],
+                      reserve[addressToken1MainChain]
+                    ).toFixed(4)}
+                  </p>
+                )}
+                {loadingPrice ? (
+                  <div>calculating...</div>
+                ) : (
+                  <p>
+                    {calculateShareOfPoolPercentage(
+                      totalSupplyPairLP,
+                      calculateLPReceived(
+                        totalSupplyPairLP,
+                        inputIn,
+                        inputOut,
+                        reserve[addressToken0MainChain],
+                        reserve[addressToken1MainChain]
+                      )
+                    ).toFixed(4)}
+                    %
+                  </p>
+                )}
               </div>
             </div>
             {/* 545454181 */}
@@ -505,7 +580,12 @@ function liquidity({}: Props) {
                 </div>
               </div>
               <div className="flex justify-end gap-2 text-sm text-gray-400">
-                <span> Balance: {userBalancePairLP}</span>
+                <span>Balance</span>
+                {loadingUserBalanceToken ? (
+                  <SVGLoader />
+                ) : (
+                  Number(userBalancePairLP).toFixed(6)
+                )}
                 <span
                   onClick={() => {
                     setLoadingRemove(true)
@@ -528,12 +608,12 @@ function liquidity({}: Props) {
                 }
               }}
               disabled={
-                loadingPrice || Number(userBalancePairLP) < Number(inputRemove)
+                loadingRemove || Number(userBalancePairLP) < Number(inputRemove)
               }
               className={`mt-2 flex w-full py-3 rounded-2xl  items-center justify-center 
           transition-all 
          ${
-           loadingPrice
+           loadingRemove
              ? 'bg-gray-600 cursor-not-allowed'
              : Number(userBalancePairLP) < Number(inputRemove)
              ? 'bg-gray-600 cursor-not-allowed'
@@ -544,7 +624,7 @@ function liquidity({}: Props) {
               <h1 className="text-xl font-bold">
                 {Number(userBalancePairLP) < Number(inputRemove)
                   ? 'Insufficient user balance'
-                  : 'Add Liquidity'}
+                  : 'Remove Liquidity'}
               </h1>
             </button>
 
@@ -554,15 +634,35 @@ function liquidity({}: Props) {
             >
               <div>
                 <p>LPs To Remove</p>
-                <p>Pooled AXL</p>
                 <p>Pooled USDT</p>
+                <p>Pooled USDC</p>
                 <p>Share of Pool</p>
               </div>
               <div className="text-right">
-                <p>12.04</p>
-                <p>30.32</p>
-                <p>12.12</p>
-                <p>0.1%</p>
+                <p>{Number(inputRemove).toFixed(4)}</p>
+                <p>
+                  {calculateAmountTokenBackWhenRemoveLP(
+                    totalSupplyPairLP,
+                    inputRemove,
+                    reserve[addressToken0MainChain],
+                    reserve[addressToken1MainChain]
+                  ).token0.toFixed(4)}
+                </p>
+                <p>
+                  {calculateAmountTokenBackWhenRemoveLP(
+                    totalSupplyPairLP,
+                    inputRemove,
+                    reserve[addressToken0MainChain],
+                    reserve[addressToken1MainChain]
+                  ).token1.toFixed(4)}
+                </p>
+                <p>
+                  {calculateShareOfPoolPercentage(
+                    totalSupplyPairLP,
+                    inputRemove
+                  ).toFixed(4)}
+                  %
+                </p>
               </div>
             </div>
             {GetChainNameByChainId(chain?.id) != ChainNameMainChainDex && (

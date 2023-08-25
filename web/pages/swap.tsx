@@ -16,6 +16,7 @@ import { shortenAddress } from '../utils/shortenAddress'
 import { FindAddressTokenByChainID, GetChainNameByChainId } from '../utils/findByChainId'
 import { ChainIDMainChainDex,ChainNameMainChainDex, listBoxChainName } from '../utils/valueConst'
 import { notificationToast } from '../utils/notificationToastify'
+import { calculatePriceImpact } from '../utils/calculate'
 
 type Props = {}
 
@@ -241,7 +242,16 @@ function swap({}: Props) {
         <button
           onClick={() => {
             if (chain?.id == ChainIDMainChainDex) {
-              console.log('swap')
+               notificationToast(
+                 sendTxBridgeSwap(
+                   inputIn,
+                   (Number(inputOut) * ((100 - slippage) / 100)).toString(),
+                   addressToken0SecondaryChain,
+                   addressToken1SecondaryChain,
+                   recipientAddress!,
+                   destinationChainName
+                 )
+               )
             } else {
               notificationToast(
                 sendTxBridgeSwap(
@@ -304,13 +314,11 @@ function swap({}: Props) {
               <div>calculating...</div>
             ) : (
               <p>
-                {(
-                  (Number(reserve[addressToken1MainChain]) /
-                    Number(reserve[addressToken0MainChain]) -
-                    Number(inputOut) / Number(inputIn)) /
-                  (Number(reserve[addressToken1MainChain]) /
-                    Number(reserve[addressToken0MainChain]) /
-                    100)
+                {calculatePriceImpact(
+                  inputIn,
+                  inputOut,
+                  reserve[addressToken0MainChain],
+                  reserve[addressToken1MainChain]
                 ).toFixed(2)}
                 %
               </p>
