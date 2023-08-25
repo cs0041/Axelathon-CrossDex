@@ -4,7 +4,7 @@ export function FindRPCByChainID(chainID: number): string {
     let rpc = ""
     switch (chainID) {
       case ChainIDAvalanchefuji:
-        rpc = 'https://avalanche-fuji.blockpi.network/v1/rpc/public'
+        rpc = 'https://avalanche-fuji-c-chain.publicnode.com'
         break
       case ChainIDMumbai:
         rpc = 'https://polygon-mumbai-bor.publicnode.com'
@@ -13,7 +13,7 @@ export function FindRPCByChainID(chainID: number): string {
         rpc = 'https://endpoints.omniatech.io/v1/fantom/testnet/public'
         break
       default:
-        rpc = 'https://avalanche-fuji.blockpi.network/v1/rpc/public'
+        rpc = 'https://avalanche-fuji-c-chain.publicnode.com'
         break
     }
    
