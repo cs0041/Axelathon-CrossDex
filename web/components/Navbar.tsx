@@ -14,6 +14,7 @@ const objTitlelink = [
   { title: 'Liquidity', link: 'liquidity' },
   { title: 'Stake', link: 'stake' },
   { title: 'Faucet', link: 'faucet' },
+  { title: 'Status Axelar Bridge', link: 'statusaxelar' },
 ]
 
 const NavbarItem = ({ title, link, currentPage, setCurrentPage }:ItemNavbar) => {
