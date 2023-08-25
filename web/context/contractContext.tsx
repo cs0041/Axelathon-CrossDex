@@ -51,7 +51,7 @@ interface IContract {
   sendTxBridgeRemoveLiquidity: (   amountliquidity: string,   addressToken0: string,   addressToken1: string,   destinationAddressReceiveToken: string,   destinationChainReceiveToken: string) => Promise<string>
   sendTxBridgeAddLiquidity: (   amount0: string,   amount1: string,   addressToken0: string,   addressToken1: string,   isForceAdd: boolean,   destinationAddressReceiveToken: string,   destinationChainReceiveToken: string) => Promise<string>
   sendTxSwapExactTokensForTokens: (   amountIn: string,   amountOutMin: string,   addressTokenIN: string,   addressTokenOut: string,   to: string,   deadline: number) => Promise<string>
-  sendTxRemoveLiquidity: (  liquidity: string,  amount1: string,  addressToken0: string,  addressToken1: string,  to: string,  deadline: number) => Promise<string>
+  sendTxRemoveLiquidity: (  liquidity: string,  addressToken0: string,  addressToken1: string,  to: string,  deadline: number) => Promise<string>
   sendTxAddLiquidity: (  amount0: string,  amount1: string,  addressToken0: string,  addressToken1: string,  isForceAdd: boolean,  to: string,  deadline: number) => Promise<string>
 }
 
@@ -521,7 +521,6 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
 
   const sendTxRemoveLiquidity = async (
     liquidity: string,
-    amount1: string,
     addressToken0: string,
     addressToken1: string,
     to: string,

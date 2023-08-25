@@ -205,6 +205,9 @@ export default function MySettingModal({
                           if (Number(e.target.value) >= 60) {
                             setDeadline(60)
                           }
+                          if (Number(e.target.value) <= 0) {
+                            setDeadline(20)
+                          }
                         }}
                         className="   w-full py-2  text-right  bg-transparent outline-none  text-white"
                         placeholder="0"
