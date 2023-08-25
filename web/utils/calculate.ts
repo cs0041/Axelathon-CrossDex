@@ -20,9 +20,20 @@ export const calculateLPReceived = (
 }
 export const calculateShareOfPoolPercentage = (
   totalSupply: string,
-  amountUserLP: string|number
+  amountUserLP: string|number,
+  isAddLP:boolean
 ) => {
-  return Number(amountUserLP) / (Number(totalSupply) / 100)
+  if (isAddLP)
+    return (
+      Number(amountUserLP) /
+      ((Number(totalSupply) + Number(amountUserLP)) / 100)
+    )
+  else{
+    return (
+      Number(amountUserLP) /
+      ((Number(totalSupply)) / 100)
+    )
+  }
 }
 
 export const calculateAmountTokenBackWhenRemoveLP = (

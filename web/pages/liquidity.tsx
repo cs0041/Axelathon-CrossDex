@@ -207,7 +207,8 @@ function liquidity({}: Props) {
                                 <p>
                                   {calculateShareOfPoolPercentage(
                                     totalSupplyPairLP,
-                                    userBalancePairLP
+                                    userBalancePairLP,
+                                    false
                                   ).toFixed(4)}
                                   %
                                 </p>
@@ -580,7 +581,8 @@ function liquidity({}: Props) {
                         inputOut,
                         reserve[addressToken0MainChain],
                         reserve[addressToken1MainChain]
-                      )
+                      ),
+                      true
                     ).toFixed(4)}
                     %
                   </p>
@@ -820,7 +822,8 @@ function liquidity({}: Props) {
                 <p>
                   {calculateShareOfPoolPercentage(
                     totalSupplyPairLP,
-                    inputRemove
+                    inputRemove,
+                    false
                   ).toFixed(4)}
                   %
                 </p>
