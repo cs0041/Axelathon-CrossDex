@@ -33,6 +33,10 @@ function liquidity({}: Props) {
     loadingUserBalanceToken,
     totalSupplyPairLP,
     loadingBalancePairLP,
+    sendTxBridgeAddLiquidity, 
+    sendTxBridgeRemoveLiquidity,
+    sendTxAddLiquidity,
+    sendTxRemoveLiquidity
   } = useContext(ContractContext)
 
 
@@ -47,7 +51,7 @@ function liquidity({}: Props) {
   const [showModalEditAddress, setShowModalEditAddress] = useState(false)
   
   // Switch
-  const [enabled, setEnabled] = useState(false)
+  const [enabled, setEnabled] = useState(true)
 
   // loading
   const [loadingPrice, setLoadingPrice] = useState(false)
@@ -405,18 +409,29 @@ function liquidity({}: Props) {
             <button
               onClick={() => {
                 if (chain?.id == ChainIDMainChainDex) {
-                  console.log('add lp')
+                  notificationToast(
+                    sendTxAddLiquidity(
+                      inputIn,
+                      inputOut,
+                      addressToken0SecondaryChain,
+                      addressToken1SecondaryChain,
+                      enabled,
+                      recipientAddress!,
+                      Date.now() + 1000 * 60 * 20
+                    )
+                  )
                 } else {
-                  // notificationToast(
-                  //   sendTxBridgeSwap(
-                  //     inputIn,
-                  //     (Number(inputOut) * ((100 - slippage) / 100)).toString(),
-                  //     addressToken0SecondaryChain,
-                  //     addressToken1SecondaryChain,
-                  //     recipientAddress!,
-                  //     destinationChainName
-                  //   )
-                  // )
+                  notificationToast(
+                    sendTxBridgeAddLiquidity(
+                      inputIn,
+                      inputOut,
+                      addressToken0SecondaryChain,
+                      addressToken1SecondaryChain,
+                      enabled,
+                      recipientAddress!,
+                      destinationChainName
+                    )
+                  )
                 }
               }}
               disabled={
@@ -603,8 +618,25 @@ function liquidity({}: Props) {
             <button
               onClick={() => {
                 if (chain?.id == ChainIDMainChainDex) {
-                  console.log('remove lp')
+                  notificationToast(
+                    sendTxRemoveLiquidity(
+                      inputRemove,
+                      addressToken0MainChain,
+                      addressToken1MainChain,
+                      recipientAddress!,
+                      Date.now() + 1000 * 60 * 20
+                    )
+                  )
                 } else {
+                   notificationToast(
+                     sendTxBridgeRemoveLiquidity(
+                       inputRemove,
+                       addressToken0SecondaryChain,
+                       addressToken1SecondaryChain,
+                       recipientAddress!,
+                       destinationChainName
+                     )
+                   )
                 }
               }}
               disabled={

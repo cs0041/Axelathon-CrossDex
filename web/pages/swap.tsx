@@ -27,6 +27,7 @@ function swap({}: Props) {
     reserve,
     userBalanceToken,
     sendTxBridgeSwap,
+    sendTxSwapExactTokensForTokens,
     loadingUserBalanceToken,
   } = useContext(ContractContext)
 
@@ -241,8 +242,17 @@ function swap({}: Props) {
         </div>
         <button
           onClick={() => {
-            if (chain?.id == ChainIDMainChainDex) {
-              console.log('swap')
+            if (chain?.id == ChainIDMainChainDex) {     
+              notificationToast(
+                sendTxSwapExactTokensForTokens(
+                  inputIn,
+                  (Number(inputOut) * ((100 - slippage) / 100)).toString(),
+                  addressToken0MainChain,
+                  addressToken1MainChain,
+                  recipientAddress!,
+                  Date.now() + 1000 * 60 * deadline
+                )
+              )
             } else {
               notificationToast(
                 sendTxBridgeSwap(
