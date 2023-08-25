@@ -33,10 +33,12 @@ function liquidity({}: Props) {
     loadingUserBalanceToken,
     totalSupplyPairLP,
     loadingBalancePairLP,
-    sendTxBridgeAddLiquidity, 
+    sendTxBridgeAddLiquidity,
     sendTxBridgeRemoveLiquidity,
     sendTxAddLiquidity,
-    sendTxRemoveLiquidity
+    sendTxRemoveLiquidity,
+    userAllowanceRouter,
+    sendTxApproveToken,
   } = useContext(ContractContext)
 
 
@@ -257,6 +259,7 @@ function liquidity({}: Props) {
             )}
           </div>
         )}
+
         {statusTabBar == TabBar.Add && (
           <>
             <div
@@ -406,21 +409,99 @@ function liquidity({}: Props) {
                 </>
               )}
             </div>
-            <button
-              onClick={() => {
-                if (chain?.id == ChainIDMainChainDex) {
-                  notificationToast(
-                    sendTxAddLiquidity(
-                      inputIn,
-                      inputOut,
-                      addressToken0SecondaryChain,
-                      addressToken1SecondaryChain,
-                      enabled,
-                      recipientAddress!,
-                      Date.now() + 1000 * 60 * 20
-                    )
-                  )
-                } else {
+            {chain?.id == ChainIDMainChainDex ? (
+              <>
+                {Number(userAllowanceRouter[addressToken0SecondaryChain]) >=
+                  Number(inputIn) &&
+                Number(userAllowanceRouter[addressToken1SecondaryChain]) >=
+                  Number(inputOut) ? (
+                  <button
+                    onClick={() => {
+                      notificationToast(
+                        sendTxAddLiquidity(
+                          inputIn,
+                          inputOut,
+                          addressToken0SecondaryChain,
+                          addressToken1SecondaryChain,
+                          enabled,
+                          recipientAddress!,
+                          Date.now() + 1000 * 60 * 20
+                        )
+                      )
+                    }}
+                    disabled={
+                      loadingPrice ||
+                      Number(userBalanceToken[addressToken0SecondaryChain]) <
+                        Number(inputIn) ||
+                      Number(userBalanceToken[addressToken1SecondaryChain]) <
+                        Number(inputOut)
+                    }
+                    className={`mt-2 flex w-full py-3 rounded-2xl  items-center justify-center 
+                  transition-all 
+                ${
+                  loadingPrice
+                    ? 'bg-gray-600 cursor-not-allowed'
+                    : Number(userBalanceToken[addressToken0SecondaryChain]) <
+                        Number(inputIn) ||
+                      Number(userBalanceToken[addressToken1SecondaryChain]) <
+                        Number(inputOut)
+                    ? 'bg-gray-600 cursor-not-allowed'
+                    : 'bg-blue-700 hover:bg-blue-600'
+                }
+                `}
+                  >
+                    <h1 className="text-xl font-bold">
+                      {Number(userBalanceToken[addressToken0SecondaryChain]) <
+                        Number(inputIn) ||
+                      Number(userBalanceToken[addressToken1SecondaryChain]) <
+                        Number(inputOut)
+                        ? 'Insufficient user balance'
+                        : 'Add Liquidity'}
+                    </h1>
+                  </button>
+                ) : (
+                  <div className="flex flex-row gap-2">
+                    {Number(userAllowanceRouter[addressToken0SecondaryChain]) <
+                      Number(inputIn) && (
+                      <button
+                        onClick={() => {
+                          notificationToast(
+                            sendTxApproveToken(
+                              addressToken0SecondaryChain,
+                              inputIn
+                            )
+                          )
+                        }}
+                        className={`mt-2 flex w-full py-3 rounded-2xl  items-center justify-center 
+                    transition-all bg-blue-700 hover:bg-blue-600 `}
+                      >
+                        <h1 className="text-xl font-bold">Approve $USDT</h1>
+                      </button>
+                    )}
+
+                    {Number(userAllowanceRouter[addressToken1SecondaryChain]) <
+                      Number(inputOut) && (
+                      <button
+                        onClick={() => {
+                          notificationToast(
+                            sendTxApproveToken(
+                              addressToken1SecondaryChain,
+                              inputOut
+                            )
+                          )
+                        }}
+                        className={`mt-2 flex w-full py-3 rounded-2xl  items-center justify-center 
+                    transition-all bg-blue-700 hover:bg-blue-600 `}
+                      >
+                        <h1 className="text-xl font-bold">Approve $USDC</h1>
+                      </button>
+                    )}
+                  </div>
+                )}
+              </>
+            ) : (
+              <button
+                onClick={() => {
                   notificationToast(
                     sendTxBridgeAddLiquidity(
                       inputIn,
@@ -432,38 +513,38 @@ function liquidity({}: Props) {
                       destinationChainName
                     )
                   )
+                }}
+                disabled={
+                  loadingPrice ||
+                  Number(userBalanceToken[addressToken0SecondaryChain]) <
+                    Number(inputIn) ||
+                  Number(userBalanceToken[addressToken1SecondaryChain]) <
+                    Number(inputOut)
                 }
-              }}
-              disabled={
-                loadingPrice ||
-                Number(userBalanceToken[addressToken0SecondaryChain]) <
-                  Number(inputIn) ||
-                Number(userBalanceToken[addressToken1SecondaryChain]) <
-                  Number(inputOut)
-              }
-              className={`mt-2 flex w-full py-3 rounded-2xl  items-center justify-center 
-          transition-all 
-         ${
-           loadingPrice
-             ? 'bg-gray-600 cursor-not-allowed'
-             : Number(userBalanceToken[addressToken0SecondaryChain]) <
-                 Number(inputIn) ||
-               Number(userBalanceToken[addressToken1SecondaryChain]) <
-                 Number(inputOut)
-             ? 'bg-gray-600 cursor-not-allowed'
-             : 'bg-blue-700 hover:bg-blue-600'
-         }
-         `}
-            >
-              <h1 className="text-xl font-bold">
-                {Number(userBalanceToken[addressToken0SecondaryChain]) <
-                  Number(inputIn) ||
-                Number(userBalanceToken[addressToken1SecondaryChain]) <
-                  Number(inputOut)
-                  ? 'Insufficient user balance'
-                  : 'Add Liquidity'}
-              </h1>
-            </button>
+                className={`mt-2 flex w-full py-3 rounded-2xl  items-center justify-center 
+                  transition-all 
+                ${
+                  loadingPrice
+                    ? 'bg-gray-600 cursor-not-allowed'
+                    : Number(userBalanceToken[addressToken0SecondaryChain]) <
+                        Number(inputIn) ||
+                      Number(userBalanceToken[addressToken1SecondaryChain]) <
+                        Number(inputOut)
+                    ? 'bg-gray-600 cursor-not-allowed'
+                    : 'bg-blue-700 hover:bg-blue-600'
+                }
+                `}
+              >
+                <h1 className="text-xl font-bold">
+                  {Number(userBalanceToken[addressToken0SecondaryChain]) <
+                    Number(inputIn) ||
+                  Number(userBalanceToken[addressToken1SecondaryChain]) <
+                    Number(inputOut)
+                    ? 'Insufficient user balance'
+                    : 'Add Liquidity'}
+                </h1>
+              </button>
+            )}
 
             <div
               className="bg-[#121A2A] flex flex-row mt-2 rounded-lg py-2 px-4 justify-between items-center
@@ -567,6 +648,7 @@ function liquidity({}: Props) {
             )}
           </>
         )}
+
         {statusTabBar == TabBar.Remove && (
           <>
             <div className="InputOrder rounded-b-none gap-1 pt-2 pb-3 px-4">
@@ -615,50 +697,97 @@ function liquidity({}: Props) {
               </div>
             </div>
 
-            <button
-              onClick={() => {
-                if (chain?.id == ChainIDMainChainDex) {
-                  notificationToast(
-                    sendTxRemoveLiquidity(
-                      inputRemove,
-                      addressToken0MainChain,
-                      addressToken1MainChain,
-                      recipientAddress!,
-                      Date.now() + 1000 * 60 * 20
-                    )
-                  )
-                } else {
-                   notificationToast(
-                     sendTxBridgeRemoveLiquidity(
-                       inputRemove,
-                       addressToken0SecondaryChain,
-                       addressToken1SecondaryChain,
-                       recipientAddress!,
-                       destinationChainName
-                     )
-                   )
+            {chain?.id == ChainIDMainChainDex ? (
+              <>
+                {Number(
+                  userAllowanceRouter[ listPairLPMainChain['USDT-USDC'].contractAddress  ] ) < Number(inputRemove) ? (
+                  <button
+                    onClick={() => {
+                        notificationToast(
+                          sendTxApproveToken(
+                            listPairLPMainChain['USDT-USDC'].contractAddress,
+                            inputRemove
+                          )
+                        )
+                    }}
+
+                    className={`mt-2 flex w-full py-3 rounded-2xl  items-center justify-center 
+                      transition-all bg-blue-700 hover:bg-blue-600`}
+                    >
+                    <h1 className="text-xl font-bold">Approve LP</h1>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                        notificationToast(
+                          sendTxRemoveLiquidity(
+                            inputRemove,
+                            addressToken0MainChain,
+                            addressToken1MainChain,
+                            recipientAddress!,
+                            Date.now() + 1000 * 60 * 20
+                          )
+                        )
+                    }}
+                    disabled={
+                      loadingRemove ||
+                      Number(userBalancePairLP) < Number(inputRemove)
+                    }
+                    className={`mt-2 flex w-full py-3 rounded-2xl  items-center justify-center 
+                transition-all 
+                ${
+                  loadingRemove
+                    ? 'bg-gray-600 cursor-not-allowed'
+                    : Number(userBalancePairLP) < Number(inputRemove)
+                    ? 'bg-gray-600 cursor-not-allowed'
+                    : 'bg-blue-700 hover:bg-blue-600'
                 }
-              }}
-              disabled={
-                loadingRemove || Number(userBalancePairLP) < Number(inputRemove)
-              }
-              className={`mt-2 flex w-full py-3 rounded-2xl  items-center justify-center 
-          transition-all 
-         ${
-           loadingRemove
-             ? 'bg-gray-600 cursor-not-allowed'
-             : Number(userBalancePairLP) < Number(inputRemove)
-             ? 'bg-gray-600 cursor-not-allowed'
-             : 'bg-blue-700 hover:bg-blue-600'
-         }
-         `}
-            >
-              <h1 className="text-xl font-bold">
-                {Number(userBalancePairLP) < Number(inputRemove)
-                  ? 'Insufficient user balance'
-                  : 'Remove Liquidity'}
-              </h1>
-            </button>
+                `}
+                  >
+                    <h1 className="text-xl font-bold">
+                      {Number(userBalancePairLP) < Number(inputRemove)
+                        ? 'Insufficient user balance'
+                        : 'Remove Liquidity'}
+                    </h1>
+                  </button>
+                )}
+              </>
+            ) : (
+              <button
+                onClick={() => {
+                    notificationToast(
+                      sendTxBridgeRemoveLiquidity(
+                        inputRemove,
+                        addressToken0SecondaryChain,
+                        addressToken1SecondaryChain,
+                        recipientAddress!,
+                        destinationChainName
+                      )
+                    )
+
+                }}
+                disabled={
+                  loadingRemove ||
+                  Number(userBalancePairLP) < Number(inputRemove)
+                }
+                className={`mt-2 flex w-full py-3 rounded-2xl  items-center justify-center 
+                transition-all 
+                ${
+                  loadingRemove
+                    ? 'bg-gray-600 cursor-not-allowed'
+                    : Number(userBalancePairLP) < Number(inputRemove)
+                    ? 'bg-gray-600 cursor-not-allowed'
+                    : 'bg-blue-700 hover:bg-blue-600'
+                }
+                `}
+              >
+                <h1 className="text-xl font-bold">
+                  {Number(userBalancePairLP) < Number(inputRemove)
+                    ? 'Insufficient user balance'
+                    : 'Remove Liquidity'}
+                </h1>
+              </button>
+            )}
 
             <div
               className="bg-[#121A2A] flex flex-row mt-2 rounded-lg py-2 px-4 justify-between items-center

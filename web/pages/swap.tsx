@@ -29,6 +29,8 @@ function swap({}: Props) {
     sendTxBridgeSwap,
     sendTxSwapExactTokensForTokens,
     loadingUserBalanceToken,
+    userAllowanceRouter,
+    sendTxApproveToken,
   } = useContext(ContractContext)
 
   // wagmi
@@ -240,20 +242,72 @@ function swap({}: Props) {
             </>
           )}
         </div>
+        {chain?.id == ChainIDMainChainDex ? (
+          <>
+            {Number(userAllowanceRouter[addressToken0MainChain]) <
+            Number(inputIn) ? (
+              <button
+                onClick={() => {
+                  notificationToast(
+                    sendTxApproveToken(addressToken0MainChain, inputIn)
+                  )
+                }}
+                className={`mt-2 flex w-full py-3 rounded-2xl  items-center justify-center 
+                      transition-all bg-blue-700 hover:bg-blue-600`}
+              >
+                <h1 className="text-xl font-bold">Approve ${symbolToken0}</h1>
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                    notificationToast(
+                      sendTxSwapExactTokensForTokens(
+                        inputIn,
+                        (
+                          Number(inputOut) *
+                          ((100 - slippage) / 100)
+                        ).toString(),
+                        addressToken0MainChain,
+                        addressToken1MainChain,
+                        recipientAddress!,
+                        Date.now() + 1000 * 60 * deadline
+                      )
+                    )
+                }}
+                disabled={
+                  loadingPrice ||
+                  Number(reserve[addressToken1MainChain]) < Number(inputOut) ||
+                  Number(userBalanceToken[addressToken0SecondaryChain]) <
+                    Number(inputIn)
+                }
+                className={`mt-2 flex w-full py-3 rounded-2xl  items-center justify-center 
+                transition-all 
+                ${
+                  loadingPrice
+                    ? 'bg-gray-600 cursor-not-allowed'
+                    : Number(reserve[addressToken1MainChain]) < Number(inputOut)
+                    ? 'bg-gray-600 cursor-not-allowed'
+                    : Number(userBalanceToken[addressToken0SecondaryChain]) <
+                      Number(inputIn)
+                    ? 'bg-gray-600 cursor-not-allowed'
+                    : 'bg-blue-700 hover:bg-blue-600'
+                }
+                `}
+              >
+                <h1 className="text-xl font-bold">
+                  {Number(reserve[addressToken1MainChain]) < Number(inputOut)
+                    ? 'Insufficient liquidity balance'
+                    : Number(userBalanceToken[addressToken0SecondaryChain]) <
+                      Number(inputIn)
+                    ? 'Insufficient user balance'
+                    : 'Swap'}
+                </h1>
+              </button>
+            )}
+          </>
+        ) : (
         <button
           onClick={() => {
-            if (chain?.id == ChainIDMainChainDex) {     
-              notificationToast(
-                sendTxSwapExactTokensForTokens(
-                  inputIn,
-                  (Number(inputOut) * ((100 - slippage) / 100)).toString(),
-                  addressToken0MainChain,
-                  addressToken1MainChain,
-                  recipientAddress!,
-                  Date.now() + 1000 * 60 * deadline
-                )
-              )
-            } else {
               notificationToast(
                 sendTxBridgeSwap(
                   inputIn,
@@ -264,7 +318,6 @@ function swap({}: Props) {
                   destinationChainName
                 )
               )
-            }
           }}
           disabled={
             loadingPrice ||
@@ -283,9 +336,9 @@ function swap({}: Props) {
                Number(inputIn)
              ? 'bg-gray-600 cursor-not-allowed'
              : 'bg-blue-700 hover:bg-blue-600'
-         }
-         `}
-        >
+          }
+          `}
+          >
           <h1 className="text-xl font-bold">
             {Number(reserve[addressToken1MainChain]) < Number(inputOut)
               ? 'Insufficient liquidity balance'
@@ -295,6 +348,8 @@ function swap({}: Props) {
               : 'Swap'}
           </h1>
         </button>
+        )}
+   
 
         <div
           className="bg-[#121A2A] flex flex-row mt-2 rounded-lg py-2 px-4 justify-between items-center
