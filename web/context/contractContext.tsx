@@ -228,7 +228,6 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
         [address1]: toEther(result._reserve1),
       }
       setReserve(DTO)
-      console.log(DTO)
     } catch (error) {
       console.log(error)
     }

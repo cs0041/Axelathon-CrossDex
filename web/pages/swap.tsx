@@ -362,7 +362,6 @@ function swap({}: Props) {
           deadline={deadline}
         />
       )}
-      <div className="bg -z-50" />
     </div>
   )
 }
