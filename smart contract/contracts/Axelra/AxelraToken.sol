@@ -5,15 +5,15 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
  
 
-contract axelraToken0 is ERC20, Ownable{
+contract CrossDexWrappedToken is ERC20, Ownable{
     address public axelraAddress;
 
     mapping(bytes32 => address) public tokenAddressMappingByChain;
 
-    constructor( ) ERC20("Wrapper Token0", "wToken0"){}
+    constructor( ) ERC20("CrossDex Wrapped USDC", "cUSDC"){}
 
     modifier onlyAxelraOrOwner() {
-        require(msg.sender == axelraAddress || msg.sender ==  owner(),"invalid caller");
+        require(msg.sender == axelraAddress || msg.sender ==  owner(),"cToken: invalid caller");
         _;
     }
 
