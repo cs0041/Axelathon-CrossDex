@@ -9,7 +9,7 @@ import { useAccount, useNetwork } from 'wagmi'
 import MyRecipientAddressModal from '../components/MyRecipientAddressModal'
 import { Switch } from '@headlessui/react'
 import { LightTooltip } from '../utils/muiStyled'
-import {  ChainIDMainChainDex,ChainNameMainChainDex, listBoxChainName, listPairLPMainChain } from '../utils/valueConst'
+import {  AllowListTradeToken, ChainIDMainChainDex,ChainNameMainChainDex, listBoxChainName, listPairLPMainChain } from '../utils/valueConst'
 import { FindAddressTokenByChainID, GetChainNameByChainId } from '../utils/findByChainId'
 import { ContractContext } from '../context/contractContext'
 import { notificationToast } from '../utils/notificationToastify'
@@ -90,8 +90,8 @@ function liquidity({}: Props) {
   const [addressToken1SecondaryChain, setAddressToken1SecondaryChain] =
     useState<string>(FindAddressTokenByChainID(chain?.id, false))
 
-  const [symbolToken0, setSymbolToken0] = useState<string>('USDT')
-  const [symbolToken1, setSymbolToken1] = useState<string>('USDC')
+  const [symbolToken0, setSymbolToken0] = useState<string>(AllowListTradeToken.Avalanche.Token0.symbol)
+  const [symbolToken1, setSymbolToken1] = useState<string>(AllowListTradeToken.Avalanche.Token1.symbol)
 
 
   return (
@@ -156,7 +156,7 @@ function liquidity({}: Props) {
                                   className="w-6 "
                                 />
                                 <span>
-                                  {listPairLPMainChain['USDT-USDC'].symbol}
+                                  {listPairLPMainChain['cUSDT-cUSDC'].symbol}
                                 </span>
                               </div>
 
@@ -179,7 +179,7 @@ function liquidity({}: Props) {
                                 </span>
                               </div>
                               <div className="flex flex-row justify-between items-center">
-                                <span>Pooled USDT</span>
+                                <span>Pooled {AllowListTradeToken.Avalanche.Token0.symbol}</span>
                                 <span>
                                   {' '}
                                   {calculateAmountTokenBackWhenRemoveLP(
@@ -191,7 +191,7 @@ function liquidity({}: Props) {
                                 </span>
                               </div>
                               <div className="flex flex-row justify-between items-center">
-                                <span>Pooled USDC</span>
+                                <span>Pooled {AllowListTradeToken.Avalanche.Token1.symbol}</span>
                                 <span>
                                   {' '}
                                   {calculateAmountTokenBackWhenRemoveLP(
@@ -427,7 +427,8 @@ function liquidity({}: Props) {
                           enabled,
                           recipientAddress!,
                           Date.now() + 1000 * 60 * 20
-                        )
+                        ),
+                        chain.id
                       )
                     }}
                     disabled={
@@ -470,7 +471,8 @@ function liquidity({}: Props) {
                             sendTxApproveToken(
                               addressToken0SecondaryChain,
                               inputIn
-                            )
+                            ),
+                            chain.id
                           )
                         }}
                         className={`mt-2 flex w-full py-3 rounded-2xl  items-center justify-center 
@@ -488,7 +490,8 @@ function liquidity({}: Props) {
                             sendTxApproveToken(
                               addressToken1SecondaryChain,
                               inputOut
-                            )
+                            ),
+                            chain.id
                           )
                         }}
                         className={`mt-2 flex w-full py-3 rounded-2xl  items-center justify-center 
@@ -512,7 +515,8 @@ function liquidity({}: Props) {
                       enabled,
                       recipientAddress!,
                       destinationChainName
-                    )
+                    ),
+                    chain?.id
                   )
                 }}
                 disabled={
@@ -552,7 +556,7 @@ function liquidity({}: Props) {
          text-gray-300  text-xs"
             >
               <div>
-                <p>{listPairLPMainChain['USDT-USDC'].symbol} LP Received</p>
+                <p>{listPairLPMainChain['cUSDT-cUSDC'].symbol} LP Received</p>
                 <p>Share of Pool</p>
               </div>
               <div className="text-right">
@@ -673,9 +677,9 @@ function liquidity({}: Props) {
                     setLoadingRemove(false)
                   }}
                 />
-                <div className="bg-[#293249]   flex flex-row justify-center w-6/12 items-center px-3 py-0   gap-1 rounded-lg text-sm">
+                <div className="bg-[#293249]   flex flex-row justify-center w-8/12 items-center px-3 py-0   gap-1 rounded-lg text-sm">
                   <img src="logo.png" alt="logo" className="w-6 h-6" />
-                  <span>{listPairLPMainChain['USDT-USDC'].symbol}</span>
+                  <span>{listPairLPMainChain['cUSDT-cUSDC'].symbol}</span>
                 </div>
               </div>
               <div className="flex justify-end gap-2 text-sm text-gray-400">
@@ -702,34 +706,38 @@ function liquidity({}: Props) {
             {chain?.id == ChainIDMainChainDex ? (
               <>
                 {Number(
-                  userAllowanceRouter[ listPairLPMainChain['USDT-USDC'].contractAddress  ] ) < Number(inputRemove) ? (
+                  userAllowanceRouter[
+                    listPairLPMainChain['cUSDT-cUSDC'].contractAddress
+                  ]
+                ) < Number(inputRemove) ? (
                   <button
                     onClick={() => {
-                        notificationToast(
-                          sendTxApproveToken(
-                            listPairLPMainChain['USDT-USDC'].contractAddress,
-                            inputRemove
-                          )
-                        )
+                      notificationToast(
+                        sendTxApproveToken(
+                          listPairLPMainChain['cUSDT-cUSDC'].contractAddress,
+                          inputRemove
+                        ),
+                        chain.id
+                      )
                     }}
-
                     className={`mt-2 flex w-full py-3 rounded-2xl  items-center justify-center 
                       transition-all bg-blue-700 hover:bg-blue-600`}
-                    >
+                  >
                     <h1 className="text-xl font-bold">Approve LP</h1>
                   </button>
                 ) : (
                   <button
                     onClick={() => {
-                        notificationToast(
-                          sendTxRemoveLiquidity(
-                            inputRemove,
-                            addressToken0MainChain,
-                            addressToken1MainChain,
-                            recipientAddress!,
-                            Date.now() + 1000 * 60 * 20
-                          )
-                        )
+                      notificationToast(
+                        sendTxRemoveLiquidity(
+                          inputRemove,
+                          addressToken0MainChain,
+                          addressToken1MainChain,
+                          recipientAddress!,
+                          Date.now() + 1000 * 60 * 20
+                        ),
+                        chain.id
+                      )
                     }}
                     disabled={
                       loadingRemove ||
@@ -757,16 +765,16 @@ function liquidity({}: Props) {
             ) : (
               <button
                 onClick={() => {
-                    notificationToast(
-                      sendTxBridgeRemoveLiquidity(
-                        inputRemove,
-                        addressToken0SecondaryChain,
-                        addressToken1SecondaryChain,
-                        recipientAddress!,
-                        destinationChainName
-                      )
-                    )
-
+                  notificationToast(
+                    sendTxBridgeRemoveLiquidity(
+                      inputRemove,
+                      addressToken0SecondaryChain,
+                      addressToken1SecondaryChain,
+                      recipientAddress!,
+                      destinationChainName
+                    ),
+                    chain?.id
+                  )
                 }}
                 disabled={
                   loadingRemove ||
@@ -797,8 +805,8 @@ function liquidity({}: Props) {
             >
               <div>
                 <p>LPs To Remove</p>
-                <p>Pooled USDT</p>
-                <p>Pooled USDC</p>
+                <p>Pooled {AllowListTradeToken.Avalanche.Token0.symbol}</p>
+                <p>Pooled {AllowListTradeToken.Avalanche.Token1.symbol}</p>
                 <p>Share of Pool</p>
               </div>
               <div className="text-right">

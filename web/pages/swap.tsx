@@ -14,7 +14,7 @@ import MySettingModal from '../components/MySettingModal'
 import { ContractContext } from '../context/contractContext'
 import { shortenAddress } from '../utils/shortenAddress'
 import { FindAddressTokenByChainID, GetChainNameByChainId } from '../utils/findByChainId'
-import { ChainIDMainChainDex,ChainNameMainChainDex, listBoxChainName } from '../utils/valueConst'
+import { AllowListTradeToken, ChainIDMainChainDex,ChainNameMainChainDex, listBoxChainName } from '../utils/valueConst'
 import { notificationToast } from '../utils/notificationToastify'
 import { calculatePriceImpact } from '../utils/calculate'
 
@@ -65,8 +65,8 @@ function swap({}: Props) {
   const [addressToken0SecondaryChain, setAddressToken0SecondaryChain] = useState<string>(FindAddressTokenByChainID(chain?.id,true))
   const [addressToken1SecondaryChain, setAddressToken1SecondaryChain] = useState<string>(FindAddressTokenByChainID(chain?.id,false))
 
-  const [symbolToken0, setSymbolToken0] = useState<string>('USDT')
-  const [symbolToken1, setSymbolToken1] = useState<string>('USDC')
+  const [symbolToken0, setSymbolToken0] = useState<string>(AllowListTradeToken.Avalanche.Token0.symbol)
+  const [symbolToken1, setSymbolToken1] = useState<string>(AllowListTradeToken.Avalanche.Token1.symbol)
   
 
   return (
@@ -249,7 +249,8 @@ function swap({}: Props) {
               <button
                 onClick={() => {
                   notificationToast(
-                    sendTxApproveToken(addressToken0MainChain, inputIn)
+                    sendTxApproveToken(addressToken0MainChain, inputIn),
+                    chain.id
                   )
                 }}
                 className={`mt-2 flex w-full py-3 rounded-2xl  items-center justify-center 
@@ -271,7 +272,8 @@ function swap({}: Props) {
                         addressToken1MainChain,
                         recipientAddress!,
                         Date.now() + 1000 * 60 * deadline
-                      )
+                      ),
+                      chain.id
                     )
                 }}
                 disabled={
@@ -316,7 +318,8 @@ function swap({}: Props) {
                   addressToken1SecondaryChain,
                   recipientAddress!,
                   destinationChainName
-                )
+                ),
+                chain?.id
               )
           }}
           disabled={

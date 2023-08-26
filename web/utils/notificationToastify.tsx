@@ -3,7 +3,11 @@ import { shortenAddress } from './shortenAddress'
 import { filterErrorMessage } from './filterErrorMessage'
 import '../styles/font.module.css'
 import SVGLoader from '../components/SVGLoader'
-export function notificationToast(myFunction: any) {
+import { findExplorerByChainID }from '../utils/findByChainId'
+import { ChainIDMainChainDex } from './valueConst'
+import Link from 'next/link'
+
+export function notificationToast(myFunction: any, chainID:number|undefined) {
   toast.promise(myFunction, {
     pending: {
       icon: ({ theme, type }) => <SVGLoader />,
@@ -40,15 +44,23 @@ export function notificationToast(myFunction: any) {
       },
       render({ data }: any) {
         return (
-          <div>
+          <div className="flex flex-col">
             <h1 className="font-bold">Transaction receipt</h1>
             <a
-              className="text-[#6f6e84] hover:text-white font-body text-xs underline mt-5"
-              href={`https:/..........io/tx/${data}`}
+              className="hover:opacity-60 transition-all text-xs font-semibold underline mt-5"
+              href={`${findExplorerByChainID(chainID)}/tx/${data}`}
               target="_blank"
             >
-              View on ....: {shortenAddress(data)}
+              View tx : {shortenAddress(data)}
             </a>
+            {chainID != ChainIDMainChainDex && (
+              <Link
+                className="hover:opacity-60 transition-all text-xs font-semibold underline mt-2"
+                href={`/statusaxelar/tx?txHash=${data}`}
+              >
+                View status bridge : {shortenAddress(data)}
+              </Link>
+            )}
           </div>
         )
       },
@@ -95,4 +107,3 @@ export function simpleNotificationToast(text: string) {
   })
 }
 
- 

@@ -14,7 +14,7 @@ import {
   toFixUnits
 } from '../utils/UnitInEther'
 import { useAccount, useNetwork } from 'wagmi'
-import { CheckAvailableChainByChainID, FindAddressAxelraByChainID, FindAddressTokenByChainID, FindRPCByChainID } from '../utils/findByChainId'
+import { CheckAvailableChainByChainID, FindAddressAxelraByChainID, FindAddressTokenByChainID, FindRPCByChainID, findEstimategasByChainID } from '../utils/findByChainId'
 import { ContractAddressRouter,ContractAddressFactory ,listPairLPMainChain, ChainIDMainChainDex, AllowListTradeToken} from '../utils/valueConst'
 
 interface IContract {
@@ -149,11 +149,11 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
         FindAddressTokenByChainID(ChainIDMainChainDex, true),
         FindAddressTokenByChainID(ChainIDMainChainDex, false)
       )
-      loadPairLPToken(listPairLPMainChain['USDT-USDC'].contractAddress)
+      loadPairLPToken(listPairLPMainChain['cUSDT-cUSDC'].contractAddress)
       loadTokenAllowanceBalanceToken(
         FindAddressTokenByChainID(ChainIDMainChainDex, true),
         FindAddressTokenByChainID(ChainIDMainChainDex, false),
-        listPairLPMainChain['USDT-USDC'].contractAddress
+        listPairLPMainChain['cUSDT-cUSDC'].contractAddress
       )
     }
     loadInint()
@@ -369,7 +369,7 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
         destinationAddressReceiveToken,
         destinationChainReceiveToken,
         {
-          value: toWei('2'),
+          value: toWei(findEstimategasByChainID(chain?.id)),
         }
       )
       await transactionHash.wait()
@@ -418,7 +418,7 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
           destinationAddressReceiveToken,
           destinationChainReceiveToken,
           {
-            value: toWei('2'),
+            value: toWei(findEstimategasByChainID(chain?.id)),
           }
         )
       await transactionHash.wait()
@@ -463,7 +463,7 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
           destinationAddressReceiveToken,
           destinationChainReceiveToken,
           {
-            value: toWei('2'),
+            value: toWei(findEstimategasByChainID(chain?.id)),
           }
         )
       await transactionHash.wait()
@@ -633,7 +633,7 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
       loadTokenAllowanceBalanceToken(
         FindAddressTokenByChainID(ChainIDMainChainDex, true),
         FindAddressTokenByChainID(ChainIDMainChainDex, false),
-        listPairLPMainChain['USDT-USDC'].contractAddress
+        listPairLPMainChain['cUSDT-cUSDC'].contractAddress
       )
       return transactionHash.hash
     } catch (error: any) {

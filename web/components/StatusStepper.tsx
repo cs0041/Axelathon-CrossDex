@@ -16,7 +16,8 @@ import { readStatusAxelarTx, sendTxAddGas, sendTxExecute } from '../utils/checkA
 import { ArrowLongLeftIcon, ArrowLongRightIcon ,DocumentDuplicateIcon} from '@heroicons/react/24/solid'
 import { shortenAddress } from '../utils/shortenAddress'
 import { notificationToast } from '../utils/notificationToastify'
-
+import { useNetwork } from 'wagmi'
+import { findExplorerByChainName } from '../utils/findByChainId'
 
 
 const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
@@ -26,13 +27,13 @@ const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.active}`]: {
     [`& .${stepConnectorClasses.line}`]: {
       backgroundImage:
-        'linear-gradient( 95deg,rgb(242,113,33) 0%,rgb(233,64,87) 50%,rgb(138,35,135) 100%)',
+        'linear-gradient(188deg, rgba(0,101,255,1) 0%, rgba(0,101,255,1) 100%)',
     },
   },
   [`&.${stepConnectorClasses.completed}`]: {
     [`& .${stepConnectorClasses.line}`]: {
       backgroundImage:
-        'linear-gradient( 95deg,rgb(242,113,33) 0%,rgb(233,64,87) 50%,rgb(138,35,135) 100%)',
+        'linear-gradient(188deg, rgba(0,101,255,1) 0%, rgba(0,101,255,1) 100%)',
     },
   },
   [`& .${stepConnectorClasses.line}`]: {
@@ -59,12 +60,12 @@ const ColorlibStepIconRoot = styled('div')<{
   alignItems: 'center',
   ...(ownerState.active && {
     backgroundImage:
-      'linear-gradient( 136deg, rgb(242,113,33) 0%, rgb(233,64,87) 50%, rgb(138,35,135) 100%)',
+      'linear-gradient(188deg, rgba(0,101,255,1) 0%, rgba(0,101,255,1) 100%)',
     boxShadow: '0 4px 10px 0 rgba(0,0,0,.25)',
   }),
   ...(ownerState.completed && {
     backgroundImage:
-      'linear-gradient( 136deg, rgb(242,113,33) 0%, rgb(233,64,87) 50%, rgb(138,35,135) 100%)',
+      'linear-gradient(188deg, rgba(0,101,255,1) 0%, rgba(0,101,255,1) 100%)',
   }),
 }))
 
@@ -124,6 +125,8 @@ enum tabCallback {
   //    (GAS_PAID_ENOUGH_GAS = 'gas_paid_enough_gas')
 
 export default function CustomizedSteppers({ txHash }: Props) {
+  const { chain } = useNetwork()
+
   const [step, setStep] = React.useState(0)
   const [buttonPaidGas, setButtonPaidGas] = React.useState(false)
   const [buttonExcute, setButtonExcute] = React.useState(false)
@@ -135,6 +138,7 @@ export default function CustomizedSteppers({ txHash }: Props) {
   const [chainName, setChainName] = React.useState('')
 
   const [excuteTx, setExcuteTx] = React.useState('')
+  const [excuteChainName, setExcuteChainName] = React.useState('')
 
   const [failToGetStatus, setFailToGetStatus] = React.useState(false)
 
@@ -153,7 +157,9 @@ export default function CustomizedSteppers({ txHash }: Props) {
         console.log('cannot_fetch_status')
       } else if (status.status == 'destination_executed') {
         console.log('destination_executed', 3)
+        setButtonExcute(false)
         setExcuteTx(status.executed.transactionHash)
+        setExcuteChainName(status.executed.chain)
         setStep(3)
         await delay(10000)
         clearInterval(interval)
@@ -168,6 +174,7 @@ export default function CustomizedSteppers({ txHash }: Props) {
         status.gasPaidInfo?.status == 'gas_paid' ||
         status.gasPaidInfo?.status == 'gas_paid_enough_gas'
       ) {
+        setButtonPaidGas(false)
         console.log('gas_paid_enough_gas', 2)
         setStep(1)
       } else if (
@@ -210,20 +217,18 @@ export default function CustomizedSteppers({ txHash }: Props) {
       ) : (
         <>
           {fristInit ? (
-            <div className="w-full flex justify-center items-center p-5">
-              <span className="loader"></span>
+            <div className="w-full flex flex-col gap-5 justify-center items-center p-5">
+              <span className="loader2"></span>
+              <span className="text-gray-500">fetch status...</span>
             </div>
           ) : (
             <>
               <div className="flex flex-row gap-2 mb-7">
                 <div
                   className="flex flex-row justify-center items-center gap-1 
-            font-bold p-2 bg-red-500 px-3 rounded-md w-fit"
+            font-bold p-2 bg-blue-700 px-3 rounded-md w-fit"
                 >
-                  <span> {shortenAddress(txNow)}</span>
-                  <span>
-                    <DocumentDuplicateIcon className="h-5 w-5 text-white  " />
-                  </span>
+                  <span>Tx: {shortenAddress(txNow)}</span>
                 </div>
                 <div className="font-bold p-2 bg-white text-black px-3 rounded-md w-fit">
                   Method: CallContract
@@ -231,7 +236,7 @@ export default function CustomizedSteppers({ txHash }: Props) {
                 {isHaveCallBack === tabCallback.Orgin && (
                   <button
                     className="flex flex-row justify-center items-center gap-1 
-                font-bold p-2 bg-red-500 px-3 rounded-md w-fit hover:opacity-60 transition-all"
+                font-bold p-2 bg-blue-700 hover:bg-blue-600 transition-all px-3 rounded-md w-fit"
                     onClick={() => {
                       setTxNow(txCallBack)
                       setIsHaveCallBack(tabCallback.Callback)
@@ -244,8 +249,8 @@ export default function CustomizedSteppers({ txHash }: Props) {
                 )}
                 {isHaveCallBack === tabCallback.Callback && (
                   <button
-                    className="flex flex-row justify-center items-center gap-1  
-                font-bold p-2 bg-red-500 px-3 rounded-md w-fit hover:opacity-60 transition-all"
+                    className="flex flex-row justify-center items-center gap-1 
+                font-bold p-2 bg-blue-700 hover:bg-blue-600 transition-all px-3 rounded-md w-fit"
                     onClick={() => {
                       setTxNow(txOrigin)
                       setIsHaveCallBack(tabCallback.Orgin)
@@ -266,21 +271,34 @@ export default function CustomizedSteppers({ txHash }: Props) {
                   {steps.map((label, index) => (
                     <Step key={label}>
                       <StepLabel
-                        style={{ color: 'red' }}
+                        style={{ color: 'blue' }}
                         StepIconComponent={ColorlibStepIcon}
                       >
-                        <div className="text-white flex flex-col gap-1 mb-2">
+                        <div className="text-white flex flex-col gap-1 mb-2 font-semibold ">
                           <span>{label}</span>
                           {step == 3 && excuteTx != '' && index == 3 && (
-                            <span>Tx : {shortenAddress(excuteTx)}</span>
+                            <div>
+                              <a
+                                className=" hover:opacity-60 transition-all text-xs underline mt-5"
+                                href={`${findExplorerByChainName(
+                                  excuteChainName
+                                )}/tx/${excuteTx}`}
+                                target="_blank"
+                              >
+                                Tx : {shortenAddress(excuteTx)}
+                              </a>
+                            </div>
                           )}
                         </div>
                         {buttonPaidGas && index == 1 && (
                           <div>
                             <button
-                              className="p-2 rounded-md bg-red-500 font-bold text-white"
+                              className="p-2 rounded-md bg-blue-700 hover:bg-blue-600 transition-all font-bold text-white"
                               onClick={() =>
-                                notificationToast(sendTxAddGas(txNow))
+                                notificationToast(
+                                  sendTxAddGas(txNow, chainName),
+                                  chain?.id
+                                )
                               }
                             >
                               Paid Gas in chain {chainName}
@@ -290,9 +308,12 @@ export default function CustomizedSteppers({ txHash }: Props) {
                         {buttonExcute && index == 3 && (
                           <div>
                             <button
-                              className="p-2 rounded-md bg-red-500 font-bold text-white"
+                              className="p-2 rounded-md bg-blue-700 hover:bg-blue-600 transition-all font-bold text-white"
                               onClick={() =>
-                                notificationToast(sendTxExecute(txNow))
+                                notificationToast(
+                                  sendTxExecute(txNow),
+                                  chain?.id
+                                )
                               }
                             >
                               Execute in chain {chainName}

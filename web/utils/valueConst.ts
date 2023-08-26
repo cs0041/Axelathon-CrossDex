@@ -2,46 +2,59 @@ export const Contract = '0x0000000000000000000000000000000000000001'
 export const ChainIDAvalanchefuji = 43113
 export const ChainIDMumbai = 80001
 export const ChainIDFantomTestnet = 4002
-export const ContractAddressFactory = '0x9ed60E9C2b11243daF4F85981bc6eEC210C26561'
-export const ContractAddressRouter = '0xdc5Faa26e349c41CD17110B5EB295A980EFA9aBA'
+export const ContractAddressFactory = '0x563dA56eaC65a85458d92A60E177d9D02f58A6D1'
+export const ContractAddressRouter = '0xcCB1ba80C80289E4192f8256C7D93cDe191DAe3e'
 export const ChainNameMainChainDex = 'Avalanche'
 export const ChainIDMainChainDex = ChainIDAvalanchefuji
 export const AllowListTradeToken = {
   Fantom: {
     Token0: {
-      symbol: 'USDT',
-      contractAddress: '0x9F5ae4C8CB7E01A53CDA260a18F85A3cFcB3Fa49',
+      symbol: 'cUSDT',
+      contractAddress: '0xa462E5457A3493128C0447112c6dF79c80CD1788',
     },
     Token1: {
-      symbol: 'USDC',
-      contractAddress: '0x99604ec84105e5C91cd6aaA3b7629c47dE95F6bd',
+      symbol: 'cUSDC',
+      contractAddress: '0x563dA56eaC65a85458d92A60E177d9D02f58A6D1',
     },
   },
   Avalanche: {
     Token0: {
-      symbol: 'USDT',
-      contractAddress: '0x974333304df277F849f21aa311aF6e0050C22623',
+      symbol: 'cUSDT',
+      contractAddress: '0x37E6e1607998f2d0329F22b91B9C86Dc64E220df',
     },
     Token1: {
-      symbol: 'USDC',
-      contractAddress: '0xC8d848847CAC98300f1A48B2ed26eD7fF3aDdbD1',
+      symbol: 'cUSDC',
+      contractAddress: '0x70D801f680b84138A32b58E96dF6fE99F266a322',
+    },
+  },
+  Polygon: {
+    Token0: {
+      symbol: 'cUSDT',
+      contractAddress: '0x6dC37FfcaFc847dD3d05cDdBa5ebAFFb2FDbA662',
+    },
+    Token1: {
+      symbol: 'cUSDC',
+      contractAddress: '0x3CeD4488aA0C3544F1990F9bEF9DcF6c02EBD8fd',
     },
   },
 }
 export const listAxelra = {
   Fantom: {
-    contractAddress: '0x6AF4a24D6E07b494d0Ae201d7376008806e89A64',
+    contractAddress: '0x4765d5C36D0f1c5d7360C34C6fA9F8dc9202124A',
   },
   Avalanche: {
-    contractAddress: '0x1d7557Da341B5521346d754D2a98AA1488318E2c',
+    contractAddress: '0xBcD0Be3E6122Dfb986E658Cf40ddfDD2B366e495',
+  },
+  Polygon: {
+    contractAddress: '0x29B08bE2203D018220938bB60435422F81E072FA',
   },
 }
 
 export const listPairLPMainChain = {
-  "USDT-USDC":{
-    symbol: 'USDT-USDC',
-    contractAddress: '0x3EDf0629A6B58E4cDf9243338d5ea99612D5C454',
-  }
+  'cUSDT-cUSDC': {
+    symbol: 'cUSDT-cUSDC',
+    contractAddress: '0xc5021e989f27763ef234f8280c89216ff3201070',
+  },
 }
  
 export const listBoxChainName = [

@@ -31,8 +31,8 @@ export function FindAddressTokenByChainID(chainID: number | undefined,isToken0: 
         break
       case ChainIDMumbai:
           addressToken = isToken0
-            ? AllowListTradeToken.Avalanche.Token0.contractAddress
-            : AllowListTradeToken.Avalanche.Token1.contractAddress
+            ? AllowListTradeToken.Polygon.Token0.contractAddress
+            : AllowListTradeToken.Polygon.Token1.contractAddress
         break
       case ChainIDFantomTestnet:
           addressToken = isToken0
@@ -56,7 +56,7 @@ export function FindAddressAxelraByChainID(chainID: number | undefined): string 
         addressAxekra = listAxelra.Avalanche.contractAddress
         break
       case ChainIDMumbai:
-        addressAxekra = listAxelra.Avalanche.contractAddress
+        addressAxekra = listAxelra.Polygon.contractAddress
         break
       case ChainIDFantomTestnet:
         addressAxekra = listAxelra.Fantom.contractAddress
@@ -105,3 +105,43 @@ export function FindAddressAxelraByChainID(chainID: number | undefined): string 
 
      return chainName
  }
+
+
+ export function findExplorerByChainID(chainID: number | undefined) {
+   switch (chainID) {
+     case ChainIDAvalanchefuji:
+       return 'https://testnet.snowtrace.io'
+     case ChainIDMumbai:
+       return 'https://mumbai.polygonscan.com'
+     case ChainIDFantomTestnet:
+       return 'https://testnet.ftmscan.com'
+     default:
+       return ''
+   }
+ }
+ export function findExplorerByChainName(chainName: string) {
+   switch (chainName.toLocaleLowerCase()) {
+     case 'avalanche':
+       return 'https://testnet.snowtrace.io'
+     case 'polygon':
+       return 'https://mumbai.polygonscan.com'
+     case 'fantom':
+       return 'https://testnet.ftmscan.com'
+     default:
+       return ''
+   }
+ }
+
+ export function findEstimategasByChainID(chainID: number|undefined) {
+   switch (chainID) {
+     case ChainIDAvalanchefuji:
+       return '0'
+     case ChainIDMumbai:
+       return '1'
+     case ChainIDFantomTestnet:
+       return '2'
+     default:
+       return '0'
+   }
+ }
+ 

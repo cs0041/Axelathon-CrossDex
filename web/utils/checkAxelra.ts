@@ -4,6 +4,9 @@ import {
   GMPStatusResponse,
   EvmChain,
 } from '@axelar-network/axelarjs-sdk'
+import { ChainIDAvalanchefuji } from './valueConst'
+import { ChainIDMumbai } from './valueConst'
+import { ChainIDFantomTestnet } from './valueConst'
 
 const sdk = new AxelarGMPRecoveryAPI({
   environment: Environment.TESTNET,
@@ -20,11 +23,11 @@ export const readStatusAxelarTx = async(txHash:string) => {
     return txStatus
 }
 
-export const sendTxAddGas = async (txHash: string) => {
-  console.log('send add gas')
+export const sendTxAddGas = async (txHash: string,chainName:string) => {
+    console.log('send add gas', chainName)
     const { success, transaction, error } = await sdk.addNativeGas(
-        EvmChain.FANTOM,
-        txHash,
+      findEvmChainObjByChainName(chainName),
+      txHash
     )
     if (success) {
       console.log('Added native gas tx:', transaction?.transactionHash)
@@ -44,4 +47,18 @@ export const sendTxExecute  = async (txHash: string) => {
     } else {
       console.log('Cannot execute manually', error)
     }
+}
+
+
+const findEvmChainObjByChainName = (chainName: string) => {
+  switch (chainName) {
+    case 'avalanche':
+      return EvmChain.AVALANCHE
+    case 'polygon':
+      return EvmChain.POLYGON
+    case 'fantom':
+      return EvmChain.FANTOM
+    default:
+      return EvmChain.FANTOM
+  }
 }

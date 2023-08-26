@@ -1,13 +1,27 @@
-import React, { useState } from 'react'
-import { readStatusAxelarTx } from '../utils/checkAxelra'
-import CustomizedSteppers from '../components/StatusStepper'
-
+import React, { useEffect, useState } from 'react'
+import { readStatusAxelarTx } from '../../utils/checkAxelra'
+import CustomizedSteppers from '../../components/StatusStepper'
+import { usePathname } from 'next/navigation'
+import { useRouter } from 'next/router'
+import { XMarkIcon } from '@heroicons/react/24/solid'
 
 type Props = {}
 
 function statusAxelar({}: Props) {
-  const [inputTx, setinputTx] = useState<string>('')
+  const currentPathName = usePathname()
+  const router = useRouter()
+
+  const { pid, txHash } = router.query
+
+  const [inputTx, setinputTx] = useState<any>(txHash)
   const [startFindStatus, setStartFindStatus] = useState(false)
+
+  useEffect(() => {
+     if(txHash){
+       setStartFindStatus(true)
+     }
+  }, [])
+  
   return (
     <div>
       <div className="flex flex-col gap-10  items-center justify-center w-9/12   mx-auto">
@@ -34,16 +48,17 @@ function statusAxelar({}: Props) {
               onClick={() => {
                 setStartFindStatus(false)
               }}
-              className="flex px-3 py-3 text-sm items-center justify-center font-bold  w-[120px] bg-red-500 rounded-md hover:opacity-60 transition-all"
+              className="flex px-3 py-3 text-sm items-center justify-center font-bold  w-[120px] bg-blue-700 hover:bg-blue-600 rounded-md hover:opacity-60 transition-all"
             >
-              clear
+              <XMarkIcon className="h-5 w-5 text-white  " />
+              Clear
             </button>
           ) : (
             <button
               onClick={() => {
                 setStartFindStatus(true)
               }}
-              className="flex px-3 py-3 text-sm items-center justify-center font-bold  w-[120px] bg-red-500 rounded-md hover:opacity-60 transition-all"
+              className="flex px-3 py-3 text-sm items-center justify-center font-bold  w-[120px] bg-blue-700 hover:bg-blue-600 rounded-md hover:opacity-60 transition-all"
             >
               Find Status
             </button>
