@@ -47,7 +47,7 @@ export function notificationToast(myFunction: any, chainID:number|undefined) {
           <div className="flex flex-col">
             <h1 className="font-bold">Transaction receipt</h1>
             <a
-              className="hover:opacity-60 transition-all text-xs font-semibold underline mt-5"
+              className="hover:opacity-60 transition-all text-xs font-semibold underline  "
               href={`${findExplorerByChainID(chainID)}/tx/${data}`}
               target="_blank"
             >
@@ -55,7 +55,7 @@ export function notificationToast(myFunction: any, chainID:number|undefined) {
             </a>
             {chainID != ChainIDMainChainDex && (
               <Link
-                className="hover:opacity-60 transition-all text-xs font-semibold underline mt-2"
+                className="hover:opacity-60 transition-all text-xs font-semibold underline "
                 href={`/statusaxelar/tx?txHash=${data}`}
               >
                 View status bridge : {shortenAddress(data)}

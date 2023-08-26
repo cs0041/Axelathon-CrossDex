@@ -3,9 +3,10 @@ import { ethers } from 'ethers'
 import  artifactCrossDexRouter from '../../smart contract/artifacts/contracts/CrossDex/CrossDexRouter.sol/CrossDexRouter.json'
 import  artifactCrossDexFactory from '../../smart contract/artifacts/contracts/CrossDex/CrossDexFactory.sol/CrossDexFactory.json'
 import  artifactCrossDexPair from '../../smart contract/artifacts/contracts/CrossDex/CrossDexPair.sol/CrossDexPair.json'
+import  artifactCrossDexFaucet from '../../smart contract/artifacts/contracts/CrossDex/CrossDexFaucet.sol/CrossDexFaucet.json'
 import  artifactSecondaryChainAxelraDexMsg from '../../smart contract/artifacts/contracts/Axelra/SecondaryChainAxelraDexMsg.sol/SecondaryChainAxelraDexMsg.json'
 import  artifactAxelraToken from '../../smart contract/artifacts/contracts/Axelra/AxelraToken.sol/axelraToken0.json'
-import { CrossDexRouter,CrossDexFactory,CrossDexPair,AxelraToken0,SecondaryChainAxelraDexMsg } from '../../smart contract/typechain-types'
+import { CrossDexRouter,CrossDexFactory,CrossDexPair,AxelraToken0,SecondaryChainAxelraDexMsg,CrossDexFaucet } from '../../smart contract/typechain-types'
 import {
   toEtherandFixFloatingPoint,
   toWei,
@@ -14,8 +15,8 @@ import {
   toFixUnits
 } from '../utils/UnitInEther'
 import { useAccount, useNetwork } from 'wagmi'
-import { CheckAvailableChainByChainID, FindAddressAxelraByChainID, FindAddressTokenByChainID, FindRPCByChainID, findEstimategasByChainID } from '../utils/findByChainId'
-import { ContractAddressRouter,ContractAddressFactory ,listPairLPMainChain, ChainIDMainChainDex, AllowListTradeToken} from '../utils/valueConst'
+import { CheckAvailableChainByChainID, FindAddressAxelraByChainID, FindAddressTokenByChainID, FindRPCByChainID, findContractAddressFaucetByChainID, findEstimategasByChainID } from '../utils/findByChainId'
+import { ContractAddressRouter,ContractAddressFactory ,listPairLPMainChain, ChainIDMainChainDex, AllowListTradeToken, contractAddressFacuect} from '../utils/valueConst'
 
 interface IContract {
   getAmountsOut: (
@@ -55,6 +56,7 @@ interface IContract {
   sendTxRemoveLiquidity: (  liquidity: string,  addressToken0: string,  addressToken1: string,  to: string,  deadline: number) => Promise<string>
   sendTxAddLiquidity: (  amount0: string,  amount1: string,  addressToken0: string,  addressToken1: string,  isForceAdd: boolean,  to: string,  deadline: number) => Promise<string>
   sendTxApproveToken: (addressToken: string, amountToApprove: string) => Promise<string>
+  sendTxGetFaucet: () => Promise<string>
 }
 
 export const ContractContext = createContext<IContract>({
@@ -77,6 +79,7 @@ export const ContractContext = createContext<IContract>({
   sendTxRemoveLiquidity: async () => '',
   sendTxAddLiquidity: async () => '',
   sendTxApproveToken: async () => '',
+  sendTxGetFaucet: async () => '',
 })
 
 interface ChildrenProps {
@@ -647,6 +650,35 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
     }
   }
 
+  const sendTxGetFaucet = async ( ) => {
+    try {
+      if (!window.ethereum) console.log('Please install metamask')
+      if (isDisconnected) throw new Error('disconnect wallet')
+      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error('wrong network')
+      const signer = providerWindow.getSigner()
+      const contractCrossDexFaucet = new ethers.Contract(
+        findContractAddressFaucetByChainID(chain?.id),
+        artifactCrossDexFaucet.abi,
+        signer
+      ) as CrossDexFaucet
+      const transactionHash = await contractCrossDexFaucet.getFaucet()
+      await transactionHash.wait()
+      loadUserBalanceToken(
+        FindAddressTokenByChainID(chain?.id, true),
+        FindAddressTokenByChainID(chain?.id, false)
+      )
+      return transactionHash.hash
+    } catch (error: any) {
+      if (error.reason) {
+        throw new Error(error.reason)
+      } else if (error.data?.message) {
+        throw new Error(error.data.message)
+      } else {
+        throw new Error(error)
+      }
+    }
+  }
+
   const addlistenerEvents = async () => {
     try {
       if (window.ethereum != undefined) {
@@ -688,6 +720,7 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
         sendTxRemoveLiquidity,
         sendTxAddLiquidity,
         sendTxApproveToken,
+        sendTxGetFaucet,
       }}
     >
       {!initialLoading && children}

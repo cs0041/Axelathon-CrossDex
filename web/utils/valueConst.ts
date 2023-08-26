@@ -63,4 +63,16 @@ export const listBoxChainName = [
   { chainName: 'Polygon' },
 ]
 
+export const contractAddressFacuect = {
+  Fantom: {
+    contractAddress: '0xB71CD463873b7d02e010e5cA8406adFDc94e3517',
+  },
+  Avalanche: {
+    contractAddress: '0xA53D22B88831Df60DF5baC8C037a53Bc5548463c',
+  },
+  Polygon: {
+    contractAddress: '0x2773fBa9d381B5B3bDcC58c0ff1403BC68a103fe',
+  },
+}
+
  

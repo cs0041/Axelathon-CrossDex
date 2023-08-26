@@ -1,4 +1,4 @@
-import { ChainIDAvalanchefuji, ChainIDMumbai,ChainIDFantomTestnet, AllowListTradeToken, listAxelra } from './valueConst'
+import { ChainIDAvalanchefuji, ChainIDMumbai,ChainIDFantomTestnet, AllowListTradeToken, listAxelra, contractAddressFacuect } from './valueConst'
 
 export function FindRPCByChainID(chainID: number): string {
     let rpc = ""
@@ -142,6 +142,21 @@ export function FindAddressAxelraByChainID(chainID: number | undefined): string 
        return '2'
      default:
        return '0'
+   }
+ }
+ 
+
+
+ export function findContractAddressFaucetByChainID(chainID: number|undefined) {
+   switch (chainID) {
+     case ChainIDAvalanchefuji:
+       return contractAddressFacuect.Avalanche.contractAddress
+     case ChainIDMumbai:
+       return contractAddressFacuect.Polygon.contractAddress
+     case ChainIDFantomTestnet:
+       return contractAddressFacuect.Fantom.contractAddress
+     default:
+       return contractAddressFacuect.Avalanche.contractAddress
    }
  }
  
