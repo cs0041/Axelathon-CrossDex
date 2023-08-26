@@ -5,14 +5,14 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interface/interfaceAxelraToken.sol";
 import "./interface/interfaceExcuteAxelraDexMsg.sol";
- 
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 // Import axelar libraries
 import "@axelar-network/axelar-gmp-sdk-solidity/contracts/interfaces/IAxelarGateway.sol";
 import "@axelar-network/axelar-gmp-sdk-solidity/contracts/interfaces/IAxelarGasService.sol";
 import "@axelar-network/axelar-gmp-sdk-solidity/contracts/executable/AxelarExecutable.sol";
 
-contract MainChainAxelraDexMsg is  Ownable, AxelarExecutable {
+contract MainChainAxelraDexMsg is  Ownable, AxelarExecutable, ReentrancyGuard {
     // Store gas service
     IAxelarGasService public immutable gasService;
     IExcutenAxelraDexMsg public excuteAxelraDexMsg;
@@ -59,7 +59,7 @@ contract MainChainAxelraDexMsg is  Ownable, AxelarExecutable {
         address[] memory addressToken,
         uint256[] memory amount,
         address to
-    ) public payable {
+    ) public payable nonReentrant{
         uint256 lengthAddressToken = addressToken.length;
         require(lengthAddressToken == amount.length,"Axelra: length addressToken must = length amount");
         // TODO: Fetch destinationAddress from destinationChain

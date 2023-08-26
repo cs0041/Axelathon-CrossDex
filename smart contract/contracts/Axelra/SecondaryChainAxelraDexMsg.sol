@@ -3,6 +3,7 @@ pragma solidity ^0.8.9;
 
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "../CrossDex/interface/interfaceCrossDexRouter.sol";
 import "../CrossDex/interface/interfaceCrossDexFactory.sol";
 import "../CrossDex/interface/interfaceCrossDexPair.sol";
@@ -14,7 +15,7 @@ import "@axelar-network/axelar-gmp-sdk-solidity/contracts/interfaces/IAxelarGate
 import "@axelar-network/axelar-gmp-sdk-solidity/contracts/interfaces/IAxelarGasService.sol";
 import "@axelar-network/axelar-gmp-sdk-solidity/contracts/executable/AxelarExecutable.sol";
 
-contract SecondaryChainAxelraDexMsg is  Ownable, AxelarExecutable {
+contract SecondaryChainAxelraDexMsg is  Ownable, AxelarExecutable,ReentrancyGuard {
     // Store gas service
     IAxelarGasService public immutable gasService;
     mapping(bytes32 => string) public destinationAddressMapping;
@@ -54,7 +55,7 @@ contract SecondaryChainAxelraDexMsg is  Ownable, AxelarExecutable {
         address addressTokenOut, 
         address destinationAddressReceiveToken,
         string memory destinationChainReceiveToken
-    ) external payable {
+    ) external payable nonReentrant{
         // TODO: Fetch destinationAddress from destinationChain
         string memory destinationAddress = destinationAddressMapping[keccak256(abi.encode(contractMainChainName))];
         string memory destinationAddressChainReceiveToken = destinationAddressMapping[keccak256(abi.encode(destinationChainReceiveToken))];
@@ -101,7 +102,7 @@ contract SecondaryChainAxelraDexMsg is  Ownable, AxelarExecutable {
         address token1, 
         address destinationAddressReceiveToken,
         string memory destinationChainReceiveToken
-    ) external payable {
+    ) external payable nonReentrant{
         // TODO: Fetch destinationAddress from destinationChain
         string memory destinationAddress = destinationAddressMapping[keccak256(abi.encode(contractMainChainName))];
         string memory destinationAddressChainReceiveToken = destinationAddressMapping[keccak256(abi.encode(destinationChainReceiveToken))];
@@ -146,7 +147,7 @@ contract SecondaryChainAxelraDexMsg is  Ownable, AxelarExecutable {
         bool isForceAdd,
         address destinationAddressReceiveToken,
         string memory destinationChainReceiveToken
-    ) external payable {
+    ) external payable nonReentrant{
         // TODO: Fetch destinationAddress from destinationChain
         string memory destinationAddress = destinationAddressMapping[keccak256(abi.encode(contractMainChainName))];
         string memory destinationAddressChainReceiveToken = destinationAddressMapping[keccak256(abi.encode(destinationChainReceiveToken))];
@@ -194,7 +195,7 @@ contract SecondaryChainAxelraDexMsg is  Ownable, AxelarExecutable {
         address[] memory addressToken,
         uint256[] memory amount,
         address to
-    ) public payable {
+    ) public payable nonReentrant{
         uint256 lengthAddressToken = addressToken.length;
         require(lengthAddressToken == amount.length,"Axelra: length addressToken must = length amount");
         // TODO: Fetch destinationAddress from destinationChain
