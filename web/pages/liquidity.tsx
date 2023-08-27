@@ -179,7 +179,10 @@ function liquidity({}: Props) {
                                 </span>
                               </div>
                               <div className="flex flex-row justify-between items-center">
-                                <span>Pooled {AllowListTradeToken.Avalanche.Token0.symbol}</span>
+                                <span>
+                                  Pooled{' '}
+                                  {AllowListTradeToken.Avalanche.Token0.symbol}
+                                </span>
                                 <span>
                                   {' '}
                                   {calculateAmountTokenBackWhenRemoveLP(
@@ -191,7 +194,10 @@ function liquidity({}: Props) {
                                 </span>
                               </div>
                               <div className="flex flex-row justify-between items-center">
-                                <span>Pooled {AllowListTradeToken.Avalanche.Token1.symbol}</span>
+                                <span>
+                                  Pooled{' '}
+                                  {AllowListTradeToken.Avalanche.Token1.symbol}
+                                </span>
                                 <span>
                                   {' '}
                                   {calculateAmountTokenBackWhenRemoveLP(
@@ -382,6 +388,25 @@ function liquidity({}: Props) {
                       userBalanceToken[addressToken1SecondaryChain]
                     ).toFixed(6)
                   )}
+                  <span
+                    onClick={async () => {
+                      setLoadingPrice(true)
+                      setLoadingIn(true)
+                      setInputOut(userBalanceToken[addressToken1SecondaryChain])
+                      const amountToken0AddLiquidity =
+                        await getQuoteForAddLiquidity(
+                          userBalanceToken[addressToken1SecondaryChain],
+                          reserve[addressToken1MainChain],
+                          reserve[addressToken0MainChain]
+                        )
+                      setInputIn(amountToken0AddLiquidity)
+                      setLoadingPrice(false)
+                      setLoadingIn(false)
+                    }}
+                    className="text-blue-500 cursor-pointer hover:text-blue-700 transition-all"
+                  >
+                    Max
+                  </span>
                 </div>
               </div>
             </div>
@@ -424,7 +449,7 @@ function liquidity({}: Props) {
                           inputOut,
                           addressToken0SecondaryChain,
                           addressToken1SecondaryChain,
-                          enabled,
+                          true,
                           recipientAddress!,
                           Date.now() + 1000 * 60 * 20
                         ),
