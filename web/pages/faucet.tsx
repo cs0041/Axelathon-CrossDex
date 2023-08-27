@@ -24,8 +24,8 @@ function faucet({}: Props) {
             </div>
             <h2 className="text-white text-base   ">Received</h2>
             <div className="flex flex-row gap-2 text-sm  text-white">
-              <div className="bg-blue-700  p-2 rounded-md">1,000 cUSDT</div>
-              <div className="bg-blue-700  p-2 rounded-md">1,000 cUSDC</div>
+              <div className="bg-blue-700  p-2 rounded-md">10,000 cUSDT</div>
+              <div className="bg-blue-700  p-2 rounded-md">10,000 cUSDC</div>
             </div>
             <button
               onClick={() => {
