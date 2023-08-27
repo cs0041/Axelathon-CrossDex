@@ -12,7 +12,7 @@ function statusAxelar({}: Props) {
     <div>
       <div className="flex flex-col gap-10  items-center justify-center w-9/12   mx-auto">
         <div className="flex flex-row justify-center items-center gap-3 w-full mt-20">
-          <div className="InputOrder  w-11/12 border-2 border-gray-700">
+          <div className="InputOrder  w-full border-2 border-gray-700">
             <input
               type="text"
               onKeyPress={(event) => {
