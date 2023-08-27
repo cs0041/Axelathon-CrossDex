@@ -15,7 +15,7 @@ import {
   toFixUnits
 } from '../utils/UnitInEther'
 import { useAccount, useNetwork } from 'wagmi'
-import { CheckAvailableChainByChainID, FindAddressAxelraByChainID, FindAddressTokenByChainID, FindRPCByChainID, findContractAddressFaucetByChainID, findEstimategasByChainID } from '../utils/findByChainId'
+import { CheckAvailableChainByChainID, FindAddressAxelraByChainID, FindAddressTokenByChainID, FindRPCByChainID, GetChainNameByChainId, findContractAddressFaucetByChainID, findEstimategasByChainID } from '../utils/findByChainId'
 import { ContractAddressRouter,ContractAddressFactory ,listPairLPMainChain, ChainIDMainChainDex, AllowListTradeToken, contractAddressFacuect} from '../utils/valueConst'
 
 interface IContract {
@@ -57,6 +57,7 @@ interface IContract {
   sendTxAddLiquidity: (  amount0: string,  amount1: string,  addressToken0: string,  addressToken1: string,  isForceAdd: boolean,  to: string,  deadline: number) => Promise<string>
   sendTxApproveToken: (addressToken: string, amountToApprove: string) => Promise<string>
   sendTxGetFaucet: () => Promise<string>
+  sendTxBridgeToken: (amount: string, addressToken: string, destinationAddressReceiveToken: string, destinationChainReceiveToken: string) => Promise<string>
 }
 
 export const ContractContext = createContext<IContract>({
@@ -80,6 +81,7 @@ export const ContractContext = createContext<IContract>({
   sendTxAddLiquidity: async () => '',
   sendTxApproveToken: async () => '',
   sendTxGetFaucet: async () => '',
+  sendTxBridgeToken: async () => '',
 })
 
 interface ChildrenProps {
@@ -482,6 +484,49 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
     }
   }
 
+  const sendTxBridgeToken = async (
+    amount: string,
+    addressToken: string,
+    destinationAddressReceiveToken: string,
+    destinationChainReceiveToken: string
+  ) => {
+    try {
+      if (!window.ethereum) console.log('Please install metamask')
+      if (isDisconnected) throw new Error('disconnect wallet')
+      if (!CheckAvailableChainByChainID(chain?.id)) throw new Error('wrong network')
+      if (GetChainNameByChainId(chain?.id) == destinationChainReceiveToken) throw new Error('cannot bridge token to same chain')
+      const signer = providerWindow.getSigner()
+      const contractSecondaryChainAxelra = new ethers.Contract(
+        FindAddressAxelraByChainID(chain?.id),
+        artifactSecondaryChainAxelraDexMsg.abi,
+        signer
+      ) as SecondaryChainAxelraDexMsg
+      const transactionHash = await contractSecondaryChainAxelra.bridgeToken(
+        destinationChainReceiveToken,
+        [addressToken],
+        [toWei(amount)],
+        destinationAddressReceiveToken,
+        {
+          value: toWei(findEstimategasByChainID(chain?.id,true)),
+        }
+      )
+      await transactionHash.wait()
+      loadUserBalanceToken(
+        FindAddressTokenByChainID(chain?.id, true),
+        FindAddressTokenByChainID(chain?.id, false)
+      )
+      return transactionHash.hash
+    } catch (error: any) {
+      if (error.reason) {
+        throw new Error(error.reason)
+      } else if (error.data?.message) {
+        throw new Error(error.data.message)
+      } else {
+        throw new Error(error)
+      }
+    }
+  }
+
   // Main Chain use
   const sendTxSwapExactTokensForTokens = async (
     amountIn: string,
@@ -721,6 +766,7 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
         sendTxAddLiquidity,
         sendTxApproveToken,
         sendTxGetFaucet,
+        sendTxBridgeToken,
       }}
     >
       {!initialLoading && children}
