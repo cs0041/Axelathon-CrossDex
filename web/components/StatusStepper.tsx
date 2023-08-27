@@ -142,17 +142,22 @@ export default function CustomizedSteppers({ txHash }: Props) {
 
   const [failToGetStatus, setFailToGetStatus] = React.useState(false)
 
-  React.useEffect(() => {
-    const interval = setInterval(async () => {
+  const [stillFind, setStillFind] = React.useState(true)
+
+  const initFindStatus = async () => {
+    console.log('initFindStatus')
+    let find = true
+    while (find) {
+      console.log('readStatusAxelarTx')
       const status = await readStatusAxelarTx(txNow)
       if (status.status == 'cannot_fetch_status' || txHash == '') {
         setFristInit(false)
-        clearInterval(interval)
+        find = false
+        setStillFind(false)
         setFailToGetStatus(true)
-      }else{
+      } else {
         setFristInit(false)
       }
- 
       if (status.status == 'cannot_fetch_status') {
         console.log('cannot_fetch_status')
       } else if (status.status == 'destination_executed') {
@@ -162,7 +167,19 @@ export default function CustomizedSteppers({ txHash }: Props) {
         setExcuteChainName(status.executed.chain)
         setStep(3)
         await delay(10000)
-        clearInterval(interval)
+        const tempStatus = await readStatusAxelarTx(txNow)
+        if (
+          tempStatus.callback != undefined &&
+          tempStatus.callback != '' &&
+          tempStatus.callback != 'undefined'
+        ) {
+          setTxCallBack(tempStatus.callback.transactionHash)
+          setIsHaveCallBack(tabCallback.Orgin)
+          console.log('have call back temp')
+          console.log(tempStatus.callback.transactionHash)
+        } 
+        find = false
+        setStillFind(false)
       } else if (status.status == 'error') {
         console.log('destination_executed error', 3)
         setStep(3)
@@ -190,25 +207,16 @@ export default function CustomizedSteppers({ txHash }: Props) {
         setStep(0)
       }
 
-      try {
-        if (
-          status.callback != undefined ||
-          status.callback != '' ||
-          status.callback != 'undefined'
-        ) {
-          setTxCallBack(status.callback.transactionHash)
-          setIsHaveCallBack(tabCallback.Orgin)
-          console.log('have call back')
-          console.log(status.callback.transactionHash)
-        }
-      } catch (error) { }
-    }, 3000)
+      await delay(5000)
+    }
+  }
 
-    return () => clearInterval(interval)
+  React.useEffect(() => {
+     initFindStatus()
   }, [isHaveCallBack])
 
   return (
-    <div className="w-full border-[1px] border-gray-700 p-5 rounded-md">
+    <div className="w-full border-[1px] border-gray-700 p-5 rounded-md relative">
       {failToGetStatus ? (
         <div className="flex flex-col gap-2 justify-center items-center text-gray-500">
           <div>Something went wrong</div>
@@ -226,7 +234,7 @@ export default function CustomizedSteppers({ txHash }: Props) {
               <div className="flex flex-row gap-2 mb-7">
                 <div
                   className="flex flex-row justify-center items-center gap-1 
-            font-bold p-2 bg-blue-700 px-3 rounded-md w-fit"
+                  font-bold p-2 bg-blue-700 px-3 rounded-md w-fit"
                 >
                   <span>Tx: {shortenAddress(txNow)}</span>
                 </div>
@@ -237,10 +245,12 @@ export default function CustomizedSteppers({ txHash }: Props) {
                   <button
                     className="flex flex-row justify-center items-center gap-1 
                 font-bold p-2 bg-blue-700 hover:bg-blue-600 transition-all px-3 rounded-md w-fit"
-                    onClick={() => {
-                      setTxNow(txCallBack)
-                      setIsHaveCallBack(tabCallback.Callback)
+                    onClick={ async () => {
                       setFristInit(true)
+                      setTxNow(txCallBack)
+                      setStillFind(true)
+                      await delay(3000)
+                      setIsHaveCallBack(tabCallback.Callback)
                     }}
                   >
                     <span>CallBack</span>
@@ -251,15 +261,20 @@ export default function CustomizedSteppers({ txHash }: Props) {
                   <button
                     className="flex flex-row justify-center items-center gap-1 
                 font-bold p-2 bg-blue-700 hover:bg-blue-600 transition-all px-3 rounded-md w-fit"
-                    onClick={() => {
-                      setTxNow(txOrigin)
-                      setIsHaveCallBack(tabCallback.Orgin)
+                    onClick={ async () => {
                       setFristInit(true)
+                      setTxNow(txOrigin)
+                      setStillFind(true)
+                      await delay(3000)
+                      setIsHaveCallBack(tabCallback.Orgin)
                     }}
                   >
                     <ArrowLongLeftIcon className="h-5 w-5 text-white  " />
                     <span>Origin</span>
                   </button>
+                )}
+                {stillFind && (
+                  <span className="loader3 absolute right-3  top-3 "></span>
                 )}
               </div>
               <Stack sx={{ width: '100%' }} spacing={4}>
