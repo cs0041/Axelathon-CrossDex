@@ -12,7 +12,6 @@ interface ItemNavbar {
 const objTitlelink = [
   { title: 'Swap', link: 'swap' },
   { title: 'Liquidity', link: 'liquidity' },
-  { title: 'Stake', link: 'stake' },
   { title: 'Faucet', link: 'faucet' },
   { title: 'Status Axelar Bridge', link: 'statusaxelar' },
 ]
