@@ -58,7 +58,7 @@ function statusAxelar({}: Props) {
               </div>
             ) : (
               <div className="text-sm text-center text-gray-500  ">
-                input transactions hash for check transactions status axelra
+                input transactions hash for check transactions status axelar
                 bridge
               </div>
             )}

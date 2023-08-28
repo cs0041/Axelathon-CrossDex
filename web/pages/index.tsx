@@ -6,26 +6,26 @@ interface Props {}
 
 function index({}: Props) {
   return (
-    <div className="flex flex-col justify-center items-center   relative mt-10">
+    <div className="flex flex-col justify-center items-center   relative my-10">
       <div className="flex flex-col gap-1 justify-center items-center">
-        <p className="font-bold text-7xl mb-1">
+        <p className="font-bold text-2xl xs:text-3xl md:text-5xl lg:text-6xl xl:text-7xl mb-1">
           It's time for cross-chain Defi
         </p>
-        <p className="text-base">
+        <p className="text-xs xs:text-sm md:text-base">
           A trading experience so simple it feels like other dex.{' '}
         </p>
-        <p className="text-sm">
+        <p className="text-[10px] xs:text-xs md:text-sm">
           Integrating defi with Axelar cross-chain technology.
         </p>
       </div>
       <div className="mt-10 mb-8 flex flex-row gap-1 justify-center items-center">
-        <img src="/logo.png" alt="logo" className="h-20 w-20" />
-        <h1 className="font-semibold text-2xl">CrossDex</h1>
+        <img src="/logo.png" alt="logo" className="h-10 w-10 xs:h-14 xs:w-14 md:h-20 md:w-20" />
+        <h1 className="font-semibold text-lg xs:text-xl md:text-2xl">CrossDex</h1>
       </div>
 
       <Link
         href={'/swap'}
-        className="mb-16 bg-[#0D111C] px-2 py-3 rounded-3xl border-[1px] border-[#fafafa4d]   w-[450px] 
+        className="mb-16 bg-[#0D111C] px-2 py-3 rounded-3xl border-[1px] border-[#fafafa4d]  w-[330px] xs:w-[400px] md:w-[450px] 
         opacity-50 !cursor-pointer hover:border-blue-700 hover:scale-110  hover:opacity-100 transition-all"
       >
         <div className="flex flex-row justify-between items-center mb-2 px-2">
@@ -102,14 +102,18 @@ function index({}: Props) {
         </button>
       </Link>
       <div className="flex flex-col gap-1 justify-center items-center">
-        <p className="font-bold text-3xl">Trade crypto in minutes</p>
-        <p className="text-sm">Buy, sell, bridge tokens cross-chain</p>
+        <p className="font-bold  text-xl md:text-2xl xl:text-3xl">
+          Trade crypto in minutes
+        </p>
+        <p className="text-xs md:text-sm">
+          Buy, sell, bridge tokens cross-chain
+        </p>
         <Link
           href={'/swap'}
           className={`mt-2 flex px-6  py-3 rounded-3xl  items-center justify-center 
           transition-all cursor-pointer bg-blue-700 hover:bg-blue-600 hover:scale-105`}
         >
-          <h1 className="text-xl font-bold">Swap Now</h1>
+          <h1 className="text-base md:text-xl font-bold">Swap Now</h1>
         </Link>
       </div>
       {/* <div className="mt-10 w-full bg-red-400 flex flex-col justify-center items-end mr-2 ">
