@@ -1,7 +1,8 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { Dispatch, SetStateAction, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import MenuDropdown from './MenuDropdown'
 
 interface ItemNavbar {
   title: string
@@ -34,18 +35,42 @@ const NavbarItem = ({ title, link, pathname }: ItemNavbar) => {
 
 function Navbar() {
   const { pathname } = useRouter()
+  const [isScrolled, setisScrolled] = useState(false)
+
+   useEffect(() => {
+     const hadnleScroll = () => {
+       if (window.scrollY > 0) {
+         setisScrolled(true)
+       } else {
+         setisScrolled(false)
+       }
+     }
+
+     window.addEventListener('scroll', hadnleScroll)
+
+     return () => {
+       window.removeEventListener('scroll', hadnleScroll)
+     }
+   }, [])
+   
   return (
     <div className="sticky inset-0 z-10">
-      <div className="flex flex-row items-center justify-between px-5 py-3 transition-all duration-200">
+      <div
+        className={`flex flex-row items-center justify-between px-5 py-3 transition-all duration-200
+      ${isScrolled && 'bg-[#0D111C] border-b-[1px] border-gray-700' }`}
+      >
         <div className="font-semibold text-base  flex flex-row justify-center items-center">
           <Link
             href={`/`}
-            className="flex gap-1 mr-6  text-xl justify-center items-center mx-2"
+            className="flex gap-1   text-xl justify-center items-center mx-2"
           >
             <img src="/logo.png" alt="logo" className="h-9 w-9" />
             {/* <h1>CrossDex</h1> */}
           </Link>
-          <div className="flex flex-row  items-center gap-2  ">
+          <div className="xl:hidden flex items-center">
+            <MenuDropdown />
+          </div>
+          <div className="xl:flex hidden flex-row  items-center gap-2  ">
             {objTitlelink.map((item, index) => (
               <NavbarItem
                 key={item.title + index}
@@ -67,7 +92,7 @@ function Navbar() {
             largeScreen: true,
           }}
           chainStatus={{
-            smallScreen: 'full',
+            smallScreen: 'icon',
             largeScreen: 'full',
           }}
         />

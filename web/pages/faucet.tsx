@@ -11,7 +11,7 @@ function faucet({}: Props) {
   const { chain } = useNetwork()
   return (
     <>
-      <div className="flex items-center justify-center mt-14 p-3">
+      <div className="flex mt-5 mb-24 xs:mt-14 p-2 justify-center items-center">
         <div className=" bg-[#0D111C]  rounded-3xl border-[1px] border-[#fafafa4d] text-gray-500 font-bold ">
           <div className="p-5  flex flex-col gap-3 justify-start ">
             <h1 className="text-white text-xl  ">Get Test Tokens</h1>

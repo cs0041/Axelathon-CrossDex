@@ -70,8 +70,8 @@ function swap({}: Props) {
   
 
   return (
-    <div className="flex mt-14 justify-center items-center">
-      <div className="relative bg-[#0D111C] px-2 py-3 rounded-3xl border-[1px] border-[#fafafa4d]   w-[450px]">
+    <div className="flex mt-5 mb-24 xs:mt-14 p-2 justify-center items-center">
+      <div className="relative bg-[#0D111C] px-2 py-3 rounded-3xl border-[1px] border-[#fafafa4d]  w-[375px] xs:w-[450px]">
         <div className="flex flex-row justify-between items-center mb-2 px-2">
           <h1 className="font-bold ">Swap</h1>
           <div
@@ -261,20 +261,17 @@ function swap({}: Props) {
             ) : (
               <button
                 onClick={() => {
-                    notificationToast(
-                      sendTxSwapExactTokensForTokens(
-                        inputIn,
-                        (
-                          Number(inputOut) *
-                          ((100 - slippage) / 100)
-                        ).toString(),
-                        addressToken0MainChain,
-                        addressToken1MainChain,
-                        recipientAddress!,
-                        Date.now() + 1000 * 60 * deadline
-                      ),
-                      chain.id
-                    )
+                  notificationToast(
+                    sendTxSwapExactTokensForTokens(
+                      inputIn,
+                      (Number(inputOut) * ((100 - slippage) / 100)).toString(),
+                      addressToken0MainChain,
+                      addressToken1MainChain,
+                      recipientAddress!,
+                      Date.now() + 1000 * 60 * deadline
+                    ),
+                    chain.id
+                  )
                 }}
                 disabled={
                   loadingPrice ||
@@ -308,8 +305,8 @@ function swap({}: Props) {
             )}
           </>
         ) : (
-        <button
-          onClick={() => {
+          <button
+            onClick={() => {
               notificationToast(
                 sendTxBridgeSwap(
                   inputIn,
@@ -321,14 +318,14 @@ function swap({}: Props) {
                 ),
                 chain?.id
               )
-          }}
-          disabled={
-            loadingPrice ||
-            Number(reserve[addressToken1MainChain]) < Number(inputOut) ||
-            Number(userBalanceToken[addressToken0SecondaryChain]) <
-              Number(inputIn)
-          }
-          className={`mt-2 flex w-full py-3 rounded-2xl  items-center justify-center 
+            }}
+            disabled={
+              loadingPrice ||
+              Number(reserve[addressToken1MainChain]) < Number(inputOut) ||
+              Number(userBalanceToken[addressToken0SecondaryChain]) <
+                Number(inputIn)
+            }
+            className={`mt-2 flex w-full py-3 rounded-2xl  items-center justify-center 
           transition-all 
          ${
            loadingPrice
@@ -339,20 +336,19 @@ function swap({}: Props) {
                Number(inputIn)
              ? 'bg-gray-600 cursor-not-allowed'
              : 'bg-blue-700 hover:bg-blue-600'
-          }
+         }
           `}
           >
-          <h1 className="text-xl font-bold">
-            {Number(reserve[addressToken1MainChain]) < Number(inputOut)
-              ? 'Insufficient liquidity balance'
-              : Number(userBalanceToken[addressToken0SecondaryChain]) <
-                Number(inputIn)
-              ? 'Insufficient user balance'
-              : 'Swap'}
-          </h1>
-        </button>
+            <h1 className="text-xl font-bold">
+              {Number(reserve[addressToken1MainChain]) < Number(inputOut)
+                ? 'Insufficient liquidity balance'
+                : Number(userBalanceToken[addressToken0SecondaryChain]) <
+                  Number(inputIn)
+                ? 'Insufficient user balance'
+                : 'Swap'}
+            </h1>
+          </button>
         )}
-   
 
         <div
           className="bg-[#121A2A] flex flex-row mt-2 rounded-lg py-2 px-4 justify-between items-center

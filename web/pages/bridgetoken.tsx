@@ -62,7 +62,7 @@ function bridgetoken({}: Props) {
 
 
   return (
-    <div className="flex mt-14 justify-center items-center">
+    <div className="flex mt-5 mb-24 xs:mt-14 p-2 justify-center items-center">
       <div className="relative bg-[#0D111C] px-2 py-3 rounded-3xl border-[1px] border-[#fafafa4d]  w-[450px]">
         <div className="flex flex-row justify-between items-center mb-2 px-2">
           <h1 className="font-bold text-sm">Bridge Token</h1>
@@ -84,21 +84,26 @@ function bridgetoken({}: Props) {
                 setInputBridge(e.target.value)
               }}
             />
-            <MyListBoxTrade
-              nowSymbolToken={symbolToken}
-              setAddressToken={setAddressToken}
-              setSymbolToken={setSymbolToken}
-              listItem={[
-                {
-                  symbol: AllowListTradeToken.Avalanche.Token0.symbol,
-                  contractAddress: FindAddressTokenByChainID(chain?.id, true),
-                },
-                {
-                  symbol: AllowListTradeToken.Avalanche.Token1.symbol,
-                  contractAddress: FindAddressTokenByChainID(chain?.id, false),
-                },
-              ]}
-            />
+            <div className="w-4/12 flex">
+              <MyListBoxTrade
+                nowSymbolToken={symbolToken}
+                setAddressToken={setAddressToken}
+                setSymbolToken={setSymbolToken}
+                listItem={[
+                  {
+                    symbol: AllowListTradeToken.Avalanche.Token0.symbol,
+                    contractAddress: FindAddressTokenByChainID(chain?.id, true),
+                  },
+                  {
+                    symbol: AllowListTradeToken.Avalanche.Token1.symbol,
+                    contractAddress: FindAddressTokenByChainID(
+                      chain?.id,
+                      false
+                    ),
+                  },
+                ]}
+              />
+            </div>
             {/* <div className="bg-[#293249]   flex flex-row justify-center items-center px-4 py-0   gap-1 rounded-lg text-sm">
               <img src="logo.png" alt="logo" className="w-6 h-6" />
               <span>{symbolToken}</span>

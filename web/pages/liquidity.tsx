@@ -95,8 +95,8 @@ function liquidity({}: Props) {
 
 
   return (
-    <div className="flex mt-14 justify-center items-center">
-      <div className="relative bg-[#0D111C] px-2 py-3 rounded-3xl border-[1px] border-[#fafafa4d]  w-[450px]">
+    <div className="flex mt-5 mb-24 xs:mt-14 p-2 justify-center items-center">
+      <div className="relative bg-[#0D111C] px-2 py-3 rounded-3xl border-[1px] border-[#fafafa4d]  w-[375px] xs:w-[450px]">
         <div className="flex flex-row justify-between items-center mb-2 px-2">
           <h1 className="font-bold text-sm">Liquidity</h1>
         </div>
@@ -702,7 +702,7 @@ function liquidity({}: Props) {
                     setLoadingRemove(false)
                   }}
                 />
-                <div className="bg-[#293249]   flex flex-row justify-center w-8/12 items-center px-3 py-0   gap-1 rounded-lg text-sm">
+                <div className="bg-[#293249]   flex flex-row justify-center w-full xs:w-8/12 items-center px-3 py-0   gap-1 rounded-lg text-sm">
                   <img src="logo.png" alt="logo" className="w-6 h-6" />
                   <span>{listPairLPMainChain['cUSDT-cUSDC'].symbol}</span>
                 </div>

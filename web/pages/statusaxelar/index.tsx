@@ -26,7 +26,7 @@ function statusAxelar({}: Props) {
               }}
               className=" text-sm  w-full py-3 px-3  text-left  bg-transparent outline-none  text-white"
               placeholder="txHash..."
-              required
+              required={true}
             />
           </div>
           {startFindStatus ? (
@@ -44,19 +44,26 @@ function statusAxelar({}: Props) {
               onClick={() => {
                 setStartFindStatus(true)
               }}
-              className="flex px-3 py-3 text-sm items-center justify-center font-bold  w-[120px] bg-blue-700 hover:bg-blue-600 rounded-md hover:opacity-60 transition-all"
+              className="flex px-3 py-3 text-[11px] lg:text-sm items-center justify-center font-bold  w-[120px] bg-blue-700 hover:bg-blue-600 rounded-md hover:opacity-60 transition-all"
             >
               Find Status
             </button>
           )}
         </div>
-        {startFindStatus ? (
-          <CustomizedSteppers txHash={inputTx} />
-        ) : (
-          <div className=" text-center text-gray-500  ">
-            input transactions hash for check transactions status axelra bridge
+        <div className=" overflow-x-auto w-full   ">
+          <div className="flex justify-center items-center w-full ">
+            {startFindStatus ? ( 
+              <div className='flex w-[700px] xs:w-full  border-[1px] border-gray-700 p-5  rounded-md '>
+                <CustomizedSteppers txHash={inputTx} />          
+              </div>
+            ) : (
+              <div className="text-sm text-center text-gray-500  ">
+                input transactions hash for check transactions status axelra
+                bridge
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   )

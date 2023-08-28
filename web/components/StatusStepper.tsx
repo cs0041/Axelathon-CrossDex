@@ -216,7 +216,7 @@ export default function CustomizedSteppers({ txHash }: Props) {
   }, [isHaveCallBack])
 
   return (
-    <div className="w-full border-[1px] border-gray-700 p-5 rounded-md relative">
+    <div className=" w-full relative">
       {failToGetStatus ? (
         <div className="flex flex-col gap-2 justify-center items-center text-gray-500">
           <div>Something went wrong</div>
@@ -231,7 +231,7 @@ export default function CustomizedSteppers({ txHash }: Props) {
             </div>
           ) : (
             <>
-              <div className="flex flex-row gap-2 mb-7">
+              <div className="flex  flex-col sm:flex-row gap-2 mb-7">
                 <div
                   className="flex flex-row justify-center items-center gap-1 
                   font-bold p-2 bg-blue-700 px-3 rounded-md w-fit"
@@ -245,7 +245,7 @@ export default function CustomizedSteppers({ txHash }: Props) {
                   <button
                     className="flex flex-row justify-center items-center gap-1 
                 font-bold p-2 bg-blue-700 hover:bg-blue-600 transition-all px-3 rounded-md w-fit"
-                    onClick={ async () => {
+                    onClick={async () => {
                       setFristInit(true)
                       setTxNow(txCallBack)
                       setStillFind(true)
@@ -261,7 +261,7 @@ export default function CustomizedSteppers({ txHash }: Props) {
                   <button
                     className="flex flex-row justify-center items-center gap-1 
                 font-bold p-2 bg-blue-700 hover:bg-blue-600 transition-all px-3 rounded-md w-fit"
-                    onClick={ async () => {
+                    onClick={async () => {
                       setFristInit(true)
                       setTxNow(txOrigin)
                       setStillFind(true)
@@ -277,7 +277,7 @@ export default function CustomizedSteppers({ txHash }: Props) {
                   <span className="loader3 absolute right-3  top-3 "></span>
                 )}
               </div>
-              <Stack sx={{ width: '100%' }} spacing={4}>
+              <div>
                 <Stepper
                   alternativeLabel
                   activeStep={step}
@@ -339,7 +339,7 @@ export default function CustomizedSteppers({ txHash }: Props) {
                     </Step>
                   ))}
                 </Stepper>
-              </Stack>
+              </div>
             </>
           )}
         </>

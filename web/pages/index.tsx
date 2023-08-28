@@ -8,7 +8,9 @@ function index({}: Props) {
   return (
     <div className="flex flex-col justify-center items-center   relative mt-10">
       <div className="flex flex-col gap-1 justify-center items-center">
-        <p className="font-bold text-7xl mb-1">It's time for cross-chain Defi</p>
+        <p className="font-bold text-7xl mb-1">
+          It's time for cross-chain Defi
+        </p>
         <p className="text-base">
           A trading experience so simple it feels like other dex.{' '}
         </p>
@@ -110,9 +112,9 @@ function index({}: Props) {
           <h1 className="text-xl font-bold">Swap Now</h1>
         </Link>
       </div>
-      <div className="fixed bottom-2 right-2   flex flex-col gap-1 justify-center items-center ">
-        <p className=" text-base text-gray-500 ">BUILD BY 0xPascal</p>
-      </div>
+      {/* <div className="mt-10 w-full bg-red-400 flex flex-col justify-center items-end mr-2 ">
+        <p className=" text-sm text-gray-500 ">BUILD BY 0xPascal</p>
+      </div> */}
     </div>
   )
 }
