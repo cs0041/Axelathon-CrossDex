@@ -13,7 +13,7 @@ export default function MenuDropdown() {
     { title: 'Faucet', link: '/faucet' },
     { title: 'Status Axelar Bridge', link: '/statusaxelar' },
   ]
-
+  console.log(pathname)
   return (
     <Menu as="div" className="z-30 relative inline-block text-left">
       {({ open }) => (
@@ -46,8 +46,8 @@ export default function MenuDropdown() {
                         onClick={close}
                         href={tab.link}
                         className={`
-                        ${active ? 'scale-105 text-blue-700' : ''} 
-                        ${tab.link == pathname ? ' text-blue-700' : ''} 
+                        ${active && 'scale-105 !text-blue-700' } 
+                        ${tab.link == pathname && ' !text-blue-700' } 
                         group text-white flex w-full items-center rounded-md px-2 py-2 text-sm sm:text-base font-bold transition-all`}
                       >
                         {tab.title}
