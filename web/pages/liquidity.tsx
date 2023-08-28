@@ -39,6 +39,7 @@ function liquidity({}: Props) {
     sendTxRemoveLiquidity,
     userAllowanceRouter,
     sendTxApproveToken,
+    loadingReserve,
   } = useContext(ContractContext)
 
 
@@ -133,7 +134,7 @@ function liquidity({}: Props) {
             <div className="bg-[#121A2A] flex flex-col justify-center items-center text-gray-300 rounded-lg  p-6">
               <h1>ADD LIQUIDITY TO RECEIVE LP TOKENS</h1>
             </div>
-            {loadingBalancePairLP ? (
+            { (loadingBalancePairLP || loadingReserve)? (
               <div className="flex justify-center items-center p-3">
                 <span className="loader"></span>
               </div>
@@ -709,7 +710,7 @@ function liquidity({}: Props) {
               </div>
               <div className="flex justify-end gap-2 text-sm text-gray-400">
                 <span>Balance</span>
-                {loadingUserBalanceToken ? (
+                {loadingBalancePairLP ? (
                   <SVGLoader />
                 ) : (
                   Number(userBalancePairLP).toFixed(6)

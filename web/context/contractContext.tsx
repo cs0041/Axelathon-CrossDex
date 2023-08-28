@@ -43,6 +43,7 @@ interface IContract {
     reserve1: string
   ) => Promise<string>
   reserve: { [x: string]: string }
+  loadingReserve: boolean
   userAllowanceRouter: {[x: string]: string;}
   userBalanceToken: { [x: string]: string }
   loadingUserBalanceToken: boolean
@@ -67,6 +68,7 @@ export const ContractContext = createContext<IContract>({
   loadUserBalanceToken: async () => {},
   getQuoteForAddLiquidity: async () => '0',
   reserve: {},
+  loadingReserve: false,
   userAllowanceRouter: {},
   userBalanceToken: {},
   loadingUserBalanceToken: false,
@@ -117,6 +119,7 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
   const [initialLoading, setInitialLoading] = useState(true)
 
   const [reserve, setReserve] = useState<{ [x: string]: string }>({})
+   const [loadingReserve, setloadingReserve] = useState<boolean>(false)
 
   // balance token
   const [userBalanceToken, setUserBalanceToken] = useState<{[x: string]: string}>({})
@@ -224,6 +227,7 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
     addressToken1: string
   ) => {
     try {
+      setloadingReserve(true)
       const pairLP = await contractCrossDexFactory.getPair(
         addressToken0,
         addressToken1
@@ -243,8 +247,10 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
         [address1]: toEther(result._reserve1),
       }
       setReserve(DTO)
+      setloadingReserve(false)
     } catch (error) {
       console.log(error)
+      setloadingReserve(false)
     }
   }
 
@@ -762,10 +768,11 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
         loadUserBalanceToken,
         getQuoteForAddLiquidity,
         reserve,
+        loadingReserve,
         userAllowanceRouter,
         userBalanceToken,
-        loadingUserBalanceToken,
-        userBalancePairLP,
+        loadingUserBalanceToken, 
+        userBalancePairLP, 
         loadingBalancePairLP,
         totalSupplyPairLP,
         sendTxBridgeSwap,
