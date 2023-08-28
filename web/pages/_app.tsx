@@ -14,7 +14,7 @@ import {
   darkTheme,
   lightTheme,
 } from '@rainbow-me/rainbowkit'
-import { Chain } from 'wagmi/chains'
+import { Chain } from '@rainbow-me/rainbowkit'
 import { ContractProvider } from '../context/contractContext'
 import Navbar from '../components/Navbar'
 import { ToastContainer } from 'react-toastify'
@@ -40,10 +40,47 @@ const hardhat: Chain = {
   testnet: true,
 }
 
+const customFantomTestnet: Chain = {
+  id: 4002,
+  name: 'Fantom Testnet',
+  network: 'fantom-testnet',
+  iconUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3513.png',
+  iconBackground: '#fff',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Fantom',
+    symbol: 'FTM',
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://rpc.testnet.fantom.network'],
+    },
+    public: {
+      http: ['https://rpc.testnet.fantom.network'],
+    },
+  },
+  blockExplorers: {
+    etherscan: {
+      name: 'FTMScan',
+      url: 'https://testnet.ftmscan.com',
+    },
+    default: {
+      name: 'FTMScan',
+      url: 'https://testnet.ftmscan.com',
+    },
+  },
+  contracts: {
+    multicall3: {
+      address: '0xca11bde05977b3631167028862be2a173976ca11',
+      blockCreated: 8328688,
+    },
+  },
+}
+
 
 
 const { chains, provider } = configureChains(
-  [avalancheFuji, fantomTestnet,polygonMumbai],
+  [avalancheFuji, customFantomTestnet, polygonMumbai],
   [
     alchemyProvider({ apiKey: '' }),
     infuraProvider({ apiKey: '' }),
