@@ -607,6 +607,11 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
         FindAddressTokenByChainID(chain?.id, true),
         FindAddressTokenByChainID(chain?.id, false)
       )
+      loadReservePairMainChain(
+        FindAddressTokenByChainID(ChainIDMainChainDex, true),
+        FindAddressTokenByChainID(ChainIDMainChainDex, false)
+      )
+      loadPairLPToken(listPairLPMainChain['cUSDT-cUSDC'].contractAddress)
       return transactionHash.hash
     } catch (error: any) {
       if (error.reason) {
@@ -649,6 +654,11 @@ export const ContractProvider = ({ children }: ChildrenProps) => {
         FindAddressTokenByChainID(chain?.id, true),
         FindAddressTokenByChainID(chain?.id, false)
       )
+      loadReservePairMainChain(
+        FindAddressTokenByChainID(ChainIDMainChainDex, true),
+        FindAddressTokenByChainID(ChainIDMainChainDex, false)
+      )
+      loadPairLPToken(listPairLPMainChain['cUSDT-cUSDC'].contractAddress)
       return transactionHash.hash
     } catch (error: any) {
       if (error.reason) {
