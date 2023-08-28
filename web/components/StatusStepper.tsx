@@ -294,7 +294,7 @@ export default function CustomizedSteppers({ txHash }: Props) {
                           {step == 3 && excuteTx != '' && index == 3 && (
                             <div>
                               <a
-                                className=" hover:opacity-60 transition-all text-xs underline mt-5"
+                                className=" hover:opacity-60 transition-all text-[10px] md:text-xs underline mt-5"
                                 href={`${findExplorerByChainName(
                                   excuteChainName
                                 )}/tx/${excuteTx}`}
@@ -308,7 +308,7 @@ export default function CustomizedSteppers({ txHash }: Props) {
                         {buttonPaidGas && index == 1 && (
                           <div>
                             <button
-                              className="p-2 rounded-md bg-blue-700 hover:bg-blue-600 transition-all font-bold text-white"
+                              className="p-2 rounded-md bg-blue-700 hover:bg-blue-600 transition-all font-bold text-white text-[10px]  xs:text-base "
                               onClick={() =>
                                 notificationToast(
                                   sendTxAddGas(txNow, chainName),
@@ -323,7 +323,7 @@ export default function CustomizedSteppers({ txHash }: Props) {
                         {buttonExcute && index == 3 && (
                           <div>
                             <button
-                              className="p-2 rounded-md bg-blue-700 hover:bg-blue-600 transition-all font-bold text-white"
+                              className="p-2 rounded-md bg-blue-700 hover:bg-blue-600 transition-all font-bold text-white text-[10px]  xs:text-base"
                               onClick={() =>
                                 notificationToast(
                                   sendTxExecute(txNow),

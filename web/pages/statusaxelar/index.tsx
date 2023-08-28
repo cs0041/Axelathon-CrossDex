@@ -10,7 +10,7 @@ function statusAxelar({}: Props) {
   const [startFindStatus, setStartFindStatus] = useState(false)
   return (
     <div>
-      <div className="flex flex-col gap-10  items-center justify-center w-9/12   mx-auto">
+      <div className="flex flex-col gap-10  items-center justify-center w-11/12 sm:w-9/12   mx-auto">
         <div className="flex flex-row justify-center items-center gap-3 w-full mt-20">
           <div className="InputOrder  w-full border-2 border-gray-700">
             <input
@@ -50,10 +50,10 @@ function statusAxelar({}: Props) {
             </button>
           )}
         </div>
-        <div className=" overflow-x-auto w-full   ">
+        <div className="  w-full   ">
           <div className="flex justify-center items-center w-full ">
             {startFindStatus ? ( 
-              <div className='flex w-[700px] xs:w-full  border-[1px] border-gray-700 p-5  rounded-md '>
+              <div className='flex w-[700px] xs:w-full  bg-gray-900  p-5  rounded-md '>
                 <CustomizedSteppers txHash={inputTx} />          
               </div>
             ) : (
