@@ -182,7 +182,10 @@ export default function CustomizedSteppers({ txHash }: Props) {
         setStillFind(false)
       } else if (status.status == 'error') {
         console.log('destination_executed error', 3)
+        setChainName(status.approved.chain)
         setStep(3)
+        find = false
+        setStillFind(false)
         setButtonExcute(true)
       } else if (status.status == 'confirmed' || status.status == 'executing') {
         console.log('confirmed || executing', 2)

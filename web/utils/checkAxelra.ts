@@ -24,6 +24,7 @@ export const readStatusAxelarTx = async(txHash:string) => {
 }
 
 export const sendTxAddGas = async (txHash: string,chainName:string) => {
+  try {
     console.log('send add gas', chainName)
     const { success, transaction, error } = await sdk.addNativeGas(
       findEvmChainObjByChainName(chainName),
@@ -34,19 +35,40 @@ export const sendTxAddGas = async (txHash: string,chainName:string) => {
       return transaction?.transactionHash
     } else {
       console.log('Cannot add native gas', error)
-      throw Error(error)
+       throw new Error('Cannot add native gas' + error)
     }
+  }  catch (error: any) {
+    if (error.reason) {
+      throw new Error(error.reason)
+    } else if (error.data?.message) {
+      throw new Error(error.data.message)
+    } else {
+      throw new Error(error)
+    }
+  }
+    
 }
 
 export const sendTxExecute  = async (txHash: string) => {
-    const {success,transaction,error} = await sdk.execute(
-      txHash,
-    )
-    if (success) {
-      console.log('Execute manually tx:', transaction?.transactionHash)
-    } else {
-      console.log('Cannot execute manually', error)
-    }
+   try {
+     const { success, transaction, error } = await sdk.execute(txHash)
+     if (success) {
+       console.log('Execute manually tx:', transaction?.transactionHash)
+       return transaction?.transactionHash
+     } else {
+       console.log('Cannot execute manually', error)
+       throw new Error('Cannot execute manually ' + error)
+     }
+   } catch (error:any) {
+      if (error.reason) {
+        throw new Error(error.reason)
+      } else if (error.data?.message) {
+        throw new Error(error.data.message)
+      } else {
+        throw new Error(error)
+      }
+   }
+   
 }
 
 
