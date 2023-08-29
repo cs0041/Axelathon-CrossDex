@@ -7,7 +7,7 @@ import { findExplorerByChainID }from '../utils/findByChainId'
 import { ChainIDMainChainDex } from './valueConst'
 import Link from 'next/link'
 
-export function notificationToast(myFunction: any, chainID:number|undefined) {
+export function notificationToast(myFunction: any, chainID:number|undefined , showStatusaxelar:boolean) {
   toast.promise(myFunction, {
     pending: {
       icon: ({ theme, type }) => <SVGLoader />,
@@ -53,7 +53,7 @@ export function notificationToast(myFunction: any, chainID:number|undefined) {
             >
               View tx : {shortenAddress(data)}
             </a>
-            {chainID != ChainIDMainChainDex && (
+            {showStatusaxelar && (
               <Link
                 className="hover:opacity-60 transition-all text-xs font-semibold underline "
                 href={`/statusaxelar/tx?txHash=${data}`}

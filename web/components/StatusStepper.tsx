@@ -315,7 +315,8 @@ export default function CustomizedSteppers({ txHash }: Props) {
                               onClick={() =>
                                 notificationToast(
                                   sendTxAddGas(txNow, chainName),
-                                  chain?.id
+                                  chain?.id,
+                                  false
                                 )
                               }
                             >
@@ -330,7 +331,8 @@ export default function CustomizedSteppers({ txHash }: Props) {
                               onClick={() =>
                                 notificationToast(
                                   sendTxExecute(txNow),
-                                  chain?.id
+                                  chain?.id,
+                                  false
                                 )
                               }
                             >

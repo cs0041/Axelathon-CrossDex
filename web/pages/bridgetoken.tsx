@@ -139,7 +139,8 @@ function bridgetoken({}: Props) {
                 recipientAddress!,
                 destinationChainName
               ),
-              chain?.id
+              chain?.id,
+              true
             )
           }}
           disabled={

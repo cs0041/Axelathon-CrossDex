@@ -29,7 +29,7 @@ function faucet({}: Props) {
             </div>
             <button
               onClick={() => {
-                notificationToast(sendTxGetFaucet(), chain?.id)
+                notificationToast(sendTxGetFaucet(), chain?.id,false)
               }}
               className="text-white  py-2 bg-blue-700 hover:bg-blue-600 rounded-md transition-all"
             >
