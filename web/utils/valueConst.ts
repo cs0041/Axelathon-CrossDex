@@ -2,8 +2,8 @@ export const Contract = '0x0000000000000000000000000000000000000001'
 export const ChainIDAvalanchefuji = 43113
 export const ChainIDMumbai = 80001
 export const ChainIDFantomTestnet = 4002
-export const ContractAddressFactory = '0x4ba60c04dAdf863850566538eA599096b88D7db2'
-export const ContractAddressRouter = '0x6f8D5dDD2AFD353530D98a46Ab0c3A22eeAd9e83'
+export const ContractAddressFactory = '0xb6C78033AdFB75D962ACE969126743c1e88bD701'
+export const ContractAddressRouter = '0x9FA10D421bCC697cFAC1452B253a957C35996248'
 export const ChainNameMainChainDex = 'Avalanche'
 export const ChainIDMainChainDex = ChainIDAvalanchefuji
 export const AllowListTradeToken = {
@@ -53,7 +53,7 @@ export const listAxelra = {
 export const listPairLPMainChain = {
   'cUSDT-cUSDC': {
     symbol: 'cUSDT-cUSDC',
-    contractAddress: '0x2306E7800863c2A3b0c7f2E861526a66ee310330',
+    contractAddress: '0xFfED21e51E81541521F01c15b0aDB13592685501',
   },
 }
  
