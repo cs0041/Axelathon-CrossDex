@@ -145,10 +145,8 @@ export default function CustomizedSteppers({ txHash }: Props) {
   const [stillFind, setStillFind] = React.useState(true)
 
   const initFindStatus = async () => {
-    console.log('initFindStatus')
     let find = true
     while (find) {
-      console.log('readStatusAxelarTx')
       const status = await readStatusAxelarTx(txNow)
       if (status.status == 'cannot_fetch_status' || txHash == '') {
         setFristInit(false)
@@ -158,10 +156,7 @@ export default function CustomizedSteppers({ txHash }: Props) {
       } else {
         setFristInit(false)
       }
-      if (status.status == 'cannot_fetch_status') {
-        console.log('cannot_fetch_status')
-      } else if (status.status == 'destination_executed') {
-        console.log('destination_executed', 3)
+      if (status.status == 'destination_executed') {
         setButtonExcute(false)
         setExcuteTx(status.executed.transactionHash)
         setExcuteChainName(status.executed.chain)
@@ -175,38 +170,31 @@ export default function CustomizedSteppers({ txHash }: Props) {
         ) {
           setTxCallBack(tempStatus.callback.transactionHash)
           setIsHaveCallBack(tabCallback.Orgin)
-          console.log('have call back temp')
-          console.log(tempStatus.callback.transactionHash)
         } 
         find = false
         setStillFind(false)
       } else if (status.status == 'error') {
-        console.log('destination_executed error', 3)
         setChainName(status.approved.chain)
         setStep(3)
         find = false
         setStillFind(false)
         setButtonExcute(true)
       } else if (status.status == 'confirmed' || status.status == 'executing') {
-        console.log('confirmed || executing', 2)
         setStep(2)
       } else if (
         status.gasPaidInfo?.status == 'gas_paid' ||
         status.gasPaidInfo?.status == 'gas_paid_enough_gas'
       ) {
         setButtonPaidGas(false)
-        console.log('gas_paid_enough_gas', 2)
         setStep(1)
       } else if (
         status.gasPaidInfo?.status == 'gas_unpaid' ||
         status.gasPaidInfo?.status == 'gas_paid_not_enough_gas'
       ) {
-        console.log('gas_unpaid', 2)
         setStep(1)
         setChainName(status.callTx.chain)
         setButtonPaidGas(true)
       } else if (status.status == 'source_gateway_called') {
-        console.log('source_gateway_called', 1)
         setStep(0)
       }
 

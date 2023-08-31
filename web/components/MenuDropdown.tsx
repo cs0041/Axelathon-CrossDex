@@ -13,7 +13,6 @@ export default function MenuDropdown() {
     { title: 'Faucet', link: '/faucet' },
     { title: 'Status Axelar Bridge', link: '/statusaxelar' },
   ]
-  console.log(pathname)
   return (
     <Menu as="div" className="z-30 relative inline-block text-left">
       {({ open }) => (

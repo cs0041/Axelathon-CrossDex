@@ -13,19 +13,12 @@ const sdk = new AxelarGMPRecoveryAPI({
 })
 
 export const readStatusAxelarTx = async(txHash:string) => {
-    console.log("start find status . . .")
     const txStatus: GMPStatusResponse = await sdk.queryTransactionStatus(txHash)
-    // console.log("status",txStatus.status)
-    // console.log("gasPaidInfo",txStatus.gasPaidInfo)
-    // console.log("callTx",txStatus.callTx)
-    // console.log("callback",txStatus.callback)
-    console.log("ALLLL",txStatus)
     return txStatus
 }
 
 export const sendTxAddGas = async (txHash: string,chainName:string) => {
   try {
-    console.log('send add gas', chainName)
     const { success, transaction, error } = await sdk.addNativeGas(
       findEvmChainObjByChainName(chainName),
       txHash

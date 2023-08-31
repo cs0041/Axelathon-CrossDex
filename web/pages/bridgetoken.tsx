@@ -129,9 +129,6 @@ function bridgetoken({}: Props) {
 
         <button
           onClick={() => {
-            console.log('inputBridge', inputBridge)
-            console.log('go to chain', destinationChainName)
-            console.log('address', addressToken)
             notificationToast(
               sendTxBridgeToken(
                 inputBridge,
